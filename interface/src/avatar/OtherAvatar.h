@@ -68,6 +68,8 @@ public:
 
     void simulate(float deltaTime, bool inView) override;
 
+    void simulate(float deltaTime, bool inView) override;
+
     friend AvatarManager;
 
 protected:
