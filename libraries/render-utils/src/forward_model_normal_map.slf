@@ -77,7 +77,8 @@ void main(void) {
         albedo,
         fresnel,
         metallic,
-        roughness),
+        roughness,
+		DEFAULT_LIGHT_SOFTNESS),
         opacity);
     color.rgb += emissive * isEmissiveEnabled();
 

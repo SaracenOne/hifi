@@ -51,5 +51,6 @@ void main(void) {
         albedo,
         roughness,
         metallic,
-        lightmap);
+        lightmap,
+		DEFAULT_LIGHT_SOFTNESS);
 }

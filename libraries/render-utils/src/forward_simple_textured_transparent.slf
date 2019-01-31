@@ -51,6 +51,7 @@ void main(void) {
         DEFAULT_FRESNEL,
         DEFAULT_METALLIC,
         DEFAULT_EMISSIVE,
-        DEFAULT_ROUGHNESS, colorAlpha),
+        DEFAULT_ROUGHNESS,
+		DEFAULT_LIGHT_SOFTNESS, colorAlpha),
         colorAlpha);
 }

@@ -146,7 +146,8 @@ void main(void) {
             fresnel,
             metallic,
             emissive,
-            roughness, alpha),
+            roughness,
+			DEFAULT_LIGHT_SOFTNESS, alpha),
             alpha);
     }
 }

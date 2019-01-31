@@ -69,5 +69,6 @@ void main(void) {
         metallic,
         emissive + fadeEmissive,
         occlusion,
-        scattering);
+        scattering,
+		DEFAULT_LIGHT_SOFTNESS);
 }

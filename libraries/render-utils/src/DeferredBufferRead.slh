@@ -47,6 +47,7 @@ struct DeferredFragment {
     int mode;
     float scattering;
     float depthVal;
+	float lightSoftness;
 };
 
 <@if not GETFRESNEL0@>
@@ -62,7 +63,7 @@ DeferredFragment unpackDeferredFragmentNoPosition(vec2 texcoord) {
     vec4 normalVal;
     vec4 diffuseVal;
     vec4 specularVal;
-    
+	
     DeferredFragment frag;
     frag.depthVal = -1.0;
     normalVal = texture(normalMap, texcoord);
@@ -81,6 +82,7 @@ DeferredFragment unpackDeferredFragmentNoPosition(vec2 texcoord) {
     frag.obscurance = min(specularVal.w, frag.obscurance);
     frag.scattering = float(frag.mode == FRAG_MODE_SCATTERING) * specularVal.x;
     frag.fresnel = getFresnelF0(frag.metallic, diffuseVal.xyz);
+	frag.lightSoftness = specularVal.y;
 
     return frag;
 }
@@ -108,6 +110,7 @@ DeferredFragment unpackDeferredFragmentNoPositionNoAmbient(vec2 texcoord) {
     frag.obscurance = 1.0;
 
     frag.fresnel = getFresnelF0(frag.metallic, diffuseVal.xyz);
+	frag.lightSoftness = 1.0;
 
     return frag;
 }

@@ -76,6 +76,7 @@ void main(void) {
         fresnel,
         metallic,
         emissive,
-        roughness, opacity),
+        roughness,
+		DEFAULT_LIGHT_SOFTNESS, opacity),
         opacity);
 }

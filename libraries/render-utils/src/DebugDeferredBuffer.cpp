@@ -77,7 +77,7 @@ static const std::string DEFAULT_OCCLUSION_SHADER{
 static const std::string DEFAULT_EMISSIVE_SHADER{
     "vec4 getFragmentColor() {"
     "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
-    "    return (frag.mode == FRAG_MODE_SHADED ? vec4(pow(texture(specularMap, uv).rgb, vec3(1.0 / 2.2)), 1.0) : "
+    "    return (frag.mode == FRAG_MODE_SHADED ? vec4(pow(frag.albedo * texture(specularMap, uv).b, vec3(1.0 / 2.2)), 1.0) : "
     "vec4(vec3(0.0), 1.0));"
     " }"
 };
@@ -101,6 +101,13 @@ static const std::string DEFAULT_SCATTERING_SHADER{
     "vec4 getFragmentColor() {"
     "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
     "    return (frag.mode == FRAG_MODE_SCATTERING ? vec4(vec3(pow(frag.scattering, 1.0 / 2.2)), 1.0) : vec4(vec3(0.0), 1.0));"
+    " }"
+};
+
+static const std::string DEFAULT_SOFTNESS_SHADER{
+    "vec4 getFragmentColor() {"
+    "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
+    "    return vec4(vec3(pow(frag.lightSoftness, 1.0 / 2.2)), 1.0);"
     " }"
 };
 
@@ -290,6 +297,8 @@ std::string DebugDeferredBuffer::getShaderSourceCode(Mode mode, const std::strin
             return DEFAULT_LIGHTMAP_SHADER;
         case ScatteringMode:
             return DEFAULT_SCATTERING_SHADER;
+        case LightSoftnessMode:
+            return DEFAULT_SOFTNESS_SHADER;
         case LightingMode:
             return DEFAULT_LIGHTING_SHADER;
         case ShadowCascade0Mode:

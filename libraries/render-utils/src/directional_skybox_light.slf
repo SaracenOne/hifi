@@ -51,6 +51,7 @@ void main(void) {
                         frag.fresnel,
                         frag.metallic,
                         frag.roughness,
+						frag.lightSoftness,
                         frag.scattering,
                         midNormalCurvature,
                         lowNormalCurvature);

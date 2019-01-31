@@ -69,5 +69,6 @@ void main(void) {
         DEFAULT_METALLIC,
         DEFAULT_EMISSIVE+emissive,
         DEFAULT_OCCLUSION,
-        DEFAULT_SCATTERING);
+        DEFAULT_SCATTERING,
+		DEFAULT_LIGHT_SOFTNESS);
 }

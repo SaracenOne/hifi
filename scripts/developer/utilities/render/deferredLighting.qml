@@ -187,6 +187,7 @@ Rectangle {
                     ListElement { text: "Occlusion"; color: "White" }
                     ListElement { text: "Lightmap"; color: "White" }
                     ListElement { text: "Scattering"; color: "White" }
+                    ListElement { text: "LightSoftness"; color: "White" }
                     ListElement { text: "Lighting"; color: "White" }
                     ListElement { text: "Shadow Cascade 0"; color: "White" }
                     ListElement { text: "Shadow Cascade 1"; color: "White" }

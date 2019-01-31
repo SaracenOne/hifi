@@ -60,5 +60,6 @@ void main(void) {
         albedo,
         roughness,
         metallic,
-        lightmap + fadeEmissive);
+        lightmap + fadeEmissive,
+		DEFAULT_LIGHT_SOFTNESS);
 }

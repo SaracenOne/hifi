@@ -71,7 +71,7 @@ void main(void) {
     TransformCamera cam = getTransformCamera();
     vec3 fragToEyeWS = cam._viewInverse[3].xyz - fragPositionWS;
     vec3 fragToEyeDirWS = normalize(fragToEyeWS);
-    SurfaceData surfaceWS = initSurfaceData(roughness, fragNormalWS, fragToEyeDirWS);
+    SurfaceData surfaceWS = initSurfaceData(roughness, DEFAULT_LIGHT_SOFTNESS, fragNormalWS, fragToEyeDirWS);
 
     vec4 localLighting = vec4(0.0);
     <$fetchClusterInfo(_positionWS)$>;

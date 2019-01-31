@@ -41,7 +41,7 @@ float evalSmithInvG1(float roughness4, float ndotd) {
     return ndotd + sqrt(roughness4+ndotd*ndotd*(1.0-roughness4));
 }
 
-SurfaceData initSurfaceData(float roughness, vec3 normal, vec3 eyeDir) {
+SurfaceData initSurfaceData(float roughness, float lightSoftness, vec3 normal, vec3 eyeDir) {
     SurfaceData surface;
     surface.eyeDir = eyeDir;
     surface.normal = normal;
@@ -57,6 +57,7 @@ SurfaceData initSurfaceData(float roughness, vec3 normal, vec3 eyeDir) {
     surface.ldoth = 0.0;
     surface.lightDir = vec3(0,0,1);
     surface.halfDir = vec3(0,0,1);
+	surface.lightSoftness = lightSoftness;
 
     return surface;
 }
@@ -69,6 +70,11 @@ void updateSurfaceDataWithLight(inout SurfaceData surface, vec3 lightDir) {
     dots.y = dot(surface.normal, surface.lightDir);
     dots.z = dot(surface.halfDir, surface.lightDir);
     dots = clamp(dots, vec3(0), vec3(1));
+    
+	// softness should be 0-1 only
+	float falloffWidth = max(mix(0.002, 0.5, surface.lightSoftness), fwidth(dots.y));
+    dots.y = smoothstep(0.5-falloffWidth, 0.5+falloffWidth, dots.y);
+	
     surface.ndoth = dots.x;
     surface.ndotl = dots.y;
     surface.ldoth = dots.z;

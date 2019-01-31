@@ -73,6 +73,7 @@ protected:
         OcclusionMode,
         LightmapMode,
         ScatteringMode,
+        LightSoftnessMode,
         LightingMode,
         ShadowCascade0Mode,
         ShadowCascade1Mode,

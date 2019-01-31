@@ -46,7 +46,7 @@ void main(void) {
         midNormalCurvature = check * midNormalCurvature;
         lowNormalCurvature = check * lowNormalCurvature;
 
-        vec3 color =  evalSkyboxGlobalColor(
+        vec3 color = evalSkyboxGlobalColor(
                         getViewInverse(),
                         shadowAttenuation,
                         frag.obscurance,
@@ -56,6 +56,7 @@ void main(void) {
                         frag.fresnel,
                         frag.metallic,
                         frag.roughness,
+						frag.lightSoftness,
                         frag.scattering,
                         midNormalCurvature,
                         lowNormalCurvature);

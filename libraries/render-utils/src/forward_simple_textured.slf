@@ -50,6 +50,7 @@ void main(void) {
         _color.rgb * texel.rgb,
         DEFAULT_FRESNEL,
         DEFAULT_METALLIC,
-        DEFAULT_ROUGHNESS),
+        DEFAULT_ROUGHNESS,
+		DEFAULT_LIGHT_SOFTNESS),
         1.0);
 }
