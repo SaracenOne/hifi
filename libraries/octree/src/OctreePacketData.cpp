@@ -743,7 +743,6 @@ int OctreePacketData::unpackDataFromBytes(const unsigned char *dataBytes, QVecto
     for (int i = 0; i < length; i++) {
         dataBytes += unpackOrientationQuatFromBytes(dataBytes, result[i]);
     }
-
     return (dataBytes - start) + (int)sizeof(uint16_t);
 }
 
