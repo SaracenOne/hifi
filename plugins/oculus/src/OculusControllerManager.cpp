@@ -17,7 +17,7 @@
 #include <controllers/UserInputMapper.h>
 #include <controllers/StandardControls.h>
 
-#include <AvatarConstants.h>
+#include <SettingHandle.h>
 #include <PerfStat.h>
 #include <PathUtils.h>
 #include <NumericalConstants.h>
@@ -32,6 +32,36 @@ using namespace hifi;
 const char* OculusControllerManager::NAME = "Oculus";
 
 const quint64 LOST_TRACKING_DELAY = 3000000;
+
+void OculusControllerManager::loadTouchSettings() {
+    Settings settings;
+    QString nameString = getName();
+    settings.beginGroup(nameString);
+    {
+        if (_touch) {
+            const double DEFAULT_TRACKED_IN_DASH = true;
+            _touch->_touchTrackedInDashMenu =
+                settings.value("touchTrackedInDashMenu", QVariant(DEFAULT_TRACKED_IN_DASH)).toBool();
+        }
+    }
+    settings.endGroup();
+}
+
+void OculusControllerManager::saveTouchSettings() const {
+    Settings settings;
+    QString nameString = getName();
+    settings.beginGroup(nameString);
+    {
+        if (_touch) {
+            settings.setValue(QString("touchTrackedInDashMenu"), _touch->_touchTrackedInDashMenu);
+        }
+    }
+    settings.endGroup();
+}
+
+void OculusControllerManager::saveSettings() const {
+    saveTouchSettings();
+}
 
 bool OculusControllerManager::isSupported() const {
     return hifi::ovr::available();
@@ -64,6 +94,7 @@ void OculusControllerManager::checkForConnectedDevices() {
                 auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
                 _touch = std::make_shared<TouchDevice>(*this);
                 userInputMapper->registerDevice(_touch);
+                loadTouchSettings();
             }
         }
     });
@@ -80,6 +111,8 @@ void OculusControllerManager::deactivate() {
     if (_remote) {
         userInputMapper->removeDevice(_remote->getDeviceID());
     }
+
+    saveSettings();
 }
 
 void OculusControllerManager::pluginUpdate(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) {
@@ -221,10 +254,12 @@ void OculusControllerManager::TouchDevice::update(float deltaTime,
         int controller = (hand == ovrHand_Left ? controller::LEFT_HAND : controller::RIGHT_HAND);
 
         // Disable hand tracking while in Oculus Dash (Dash renders it's own hands)
-        if (!hasInputFocus) {
-            _poseStateMap.erase(controller);
-            _poseStateMap[controller].valid = false;
-            return;
+        if (!_touchTrackedInDashMenu) {
+            if (!hasInputFocus) {
+                _poseStateMap.erase(controller);
+                _poseStateMap[controller].valid = false;
+                return;
+            }
         }
 
         if (REQUIRED_HAND_STATUS == (tracking.HandStatusFlags[hand] & REQUIRED_HAND_STATUS)) {

@@ -24,6 +24,9 @@ class OculusControllerManager : public InputPlugin {
     Q_OBJECT
 public:
     // Plugin functions
+    void loadTouchSettings();
+    void saveTouchSettings() const;
+    void saveSettings() const;
     bool isSupported() const override;
     const QString getName() const override { return NAME; }
     bool isHandController() const override { return _touch != nullptr; }
@@ -88,6 +91,8 @@ private:
         using Locker = std::unique_lock<std::recursive_mutex>;
         template <typename F>
         void withLock(F&& f) { Locker locker(_lock); f(); }
+
+        bool _touchTrackedInDashMenu{ true };
 
         float _leftHapticDuration { 0.0f };
         float _leftHapticStrength { 0.0f };

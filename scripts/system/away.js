@@ -65,6 +65,8 @@ var eventMapping = Controller.newMapping(eventMappingName);
 var avatarPosition = MyAvatar.position;
 var wasHmdMounted = HMD.mounted;
 
+var goAwayOnMouseCaptureLoss = Settings.getValue('goAwayOnMouseCaptureLoss', false);
+Settings.setValue('goAwayOnMouseCaptureLoss', goAwayOnMouseCaptureLoss);
 
 // some intervals we may create/delete
 var avatarMovedInterval;
@@ -272,8 +274,10 @@ function maybeGoAway() {
     if (Reticle.mouseCaptured !== wasMouseCaptured) {
         wasMouseCaptured = !wasMouseCaptured;
         if (!wasMouseCaptured) {
-            goAway();
-            return;
+			if (goAwayOnMouseCaptureLoss) {
+				goAway();
+				return;
+			}
         }
     }
 
