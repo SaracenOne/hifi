@@ -475,7 +475,7 @@ protected:
     AnimContext _lastContext;
     AnimVariantMap _lastAnimVars;
 
-    SnapshotBlendPoseHelper _hipsBlendHelper; 
+    SnapshotBlendPoseHelper _hipsBlendHelper;
     ControllerParameters _previousControllerParameters;
     Flow _internalFlow;
     Flow _networkFlow;
