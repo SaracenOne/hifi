@@ -68,6 +68,8 @@
 
 using namespace std;
 
+#define HIFI_USE_OPTIMIZED_IK
+
 const float DEFAULT_REAL_WORLD_FIELD_OF_VIEW_DEGREES = 30.0f;
 
 const float YAW_SPEED_DEFAULT = 100.0f;   // degrees/sec

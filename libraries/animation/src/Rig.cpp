@@ -34,6 +34,8 @@
 #include "IKTarget.h"
 #include "PathUtils.h"
 
+#define HIFI_USE_OPTIMIZED_IK
+
 static int nextRigId = 1;
 static std::map<int, Rig*> rigRegistry;
 static std::mutex rigRegistryMutex;
@@ -2005,7 +2007,7 @@ static float computeUlnarRadialCompensation(float ulnarRadialTheta, float twistT
 
 static float computeTwistCompensation(float twistTheta, bool left) {
 
-    const float TWIST_LIMIT_CLOCKWISE = 7.0f * PI / 20.0f;
+    const float TWIST_LIMIT_CLOCKWISE = 6.0f * PI / 20.0f;//was 7.0f
     const float TWIST_LIMIT_COUNTER_CLOCKWISE = -3.0f * PI / 10.0f;
 
     float twistCorrection = 0.0f;
@@ -2026,7 +2028,7 @@ static float computeTwistCompensation(float twistTheta, bool left) {
 static float computeFlexCompensation(float flexTheta, float twistTheta, bool left) {
 
     const float FLEX_BOUNDARY = PI / 6.0f;
-    const float EXTEND_BOUNDARY = -4.0f * PI / 20.0f;
+    const float EXTEND_BOUNDARY = -5.0f * PI / 20.0f; // was -4.0f
     float flexCorrection = 0.0f;
     float currentWristCoefficient = 0.0f;
     float dynamicFlexBoundary = FLEX_BOUNDARY * (((PI / 2.0f) - fabsf(twistTheta)) / (PI / 2.0f));
@@ -2092,8 +2094,6 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
         if ((shoulderSpaceArmHand.x < 0.10f)) {
             return false;
         }
-
-
     }
 
     // get the pole vector theta based on the hand position relative to the shoulder.
@@ -2142,11 +2142,6 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
     AnimPose updatedAbsBase = parentShoulderPose * AnimPose(relBaseRot,glm::vec3());
     AnimPose relMid = shoulderPose.inverse() * elbowPose;
     AnimPose newAbsMid = updatedAbsBase * relMid;
-
-    if (left) {
-      //  DebugDraw::getInstance().addMarker("oldpose", handPose.rot(), handPose.trans(), glm::vec4(1));
-      //  DebugDraw::getInstance().addMarker("computedpose", newAbsMid.rot(), glm::vec3(handPose.trans().x, handPose.trans().y + 0.3f, handPose.trans().z), glm::vec4(1));
-    }
 
     // now we calculate the contribution of the hand rotation relative to the arm
     glm::quat relativeHandRotation = (newAbsMid.inverse() * handPose).rot();
@@ -2257,6 +2252,8 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
     // make the lower boundary vary with the body
     float lowerBoundary = LOWER_ANATOMICAL_ANGLE;
     if (fabsf(positionalTheta) < LOWER_ANATOMICAL_ANGLE) {
+        float boundaryDiff = LOWER_ANATOMICAL_ANGLE - fabsf(positionalTheta);
+        lowerBoundary = (0.5f * boundaryDiff) + fabsf(positionalTheta);
         //lowerBoundary = positionalTheta;
     }
     float thetaRadians = 0.0f;
