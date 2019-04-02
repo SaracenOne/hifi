@@ -122,39 +122,13 @@ const AnimPoseVec& AnimPoleVectorConstraint::evaluate(const AnimVariantMap& anim
         float theta = copysignf(1.0f, sideDot) * acosf(dot);
 
         glm::quat deltaRot = glm::angleAxis(theta, unitAxis);
-       
-        glm::quat axisPoleRotation;
-        glm::quat nonAxisPoleRotation;
-        swingTwistDecomposition(deltaRot * basePose.rot(), unitAxis, nonAxisPoleRotation, axisPoleRotation);
-        glm::quat axisPoleRotation2;
-        glm::quat nonAxisPoleRotation2;
-        swingTwistDecomposition(basePose.rot(), unitAxis, nonAxisPoleRotation2, axisPoleRotation2);
 
         // transform result back into parent relative frame.
         glm::quat relBaseRot = glm::inverse(baseParentPose.rot()) * deltaRot * basePose.rot();
-        glm::quat axisPoleRotation3;
-        glm::quat nonAxisPoleRotation3;
-        glm::vec3 localUnitAxis = glm::inverse(baseParentPose.rot()) * unitAxis;
-        swingTwistDecomposition(relBaseRot, localUnitAxis, nonAxisPoleRotation3, axisPoleRotation3);
-
-        glm::quat axisPoleRotation4;
-        glm::quat nonAxisPoleRotation4;
-        //glm::vec3 localUnitAxis = glm::inverse(baseParentPose.rot()) * unitAxis;
-        swingTwistDecomposition(underPoses[_baseJointIndex].rot(), localUnitAxis, nonAxisPoleRotation4, axisPoleRotation4);
-
         ikChain.setRelativePoseAtJointIndex(_baseJointIndex, AnimPose(relBaseRot, underPoses[_baseJointIndex].trans()));
 
         glm::quat relTipRot = glm::inverse(midPose.rot()) * glm::inverse(deltaRot) * tipPose.rot();
         ikChain.setRelativePoseAtJointIndex(_tipJointIndex, AnimPose(relTipRot, underPoses[_tipJointIndex].trans()));
-        ikChain.buildDirtyAbsolutePoses();
-        AnimPose midPose2 = ikChain.getAbsolutePoseFromJointIndex(_midJointIndex);
-        glm::vec3 refVector2 = midPose2.xformVectorFast(_referenceVector);
-
-       // qCDebug(animation) << "pole vector  constraint elbow x " << glm::normalize(refVector2);
-       // qCDebug(animation) << "pole vector constraint unit axis " << unitAxis << " local unit " << localUnitAxis << " base parent rotation " << baseParentPose.rot();
-       // qCDebug(animation) << "pole vector constraint absolute rotation " << deltaRot * basePose.rot();
-       // qCDebug(animation) << "pole vector constraint absolute twist angle " << glm::angle(axisPoleRotation) << " before delta " << glm::angle(axisPoleRotation2) << " delta " << theta << " local " << glm::angle(axisPoleRotation3) << " local before delta " << glm::angle(axisPoleRotation4);
-
     }
 
     // start off by initializing output poses with the underPoses

@@ -34,7 +34,6 @@
 #include "IKTarget.h"
 #include "PathUtils.h"
 
-
 static int nextRigId = 1;
 static std::map<int, Rig*> rigRegistry;
 static std::mutex rigRegistryMutex;
@@ -54,7 +53,6 @@ static bool isEqual(const glm::quat& p, const glm::quat& q) {
 }
 
 #define ASSERT(cond) assert(cond)
-#define HIFI_USE_OPTIMIZED_IK
 
 // 2 meter tall dude
 const glm::vec3 DEFAULT_RIGHT_EYE_POS(-0.3f, 0.9f, 0.0f);
@@ -1689,7 +1687,7 @@ void Rig::updateHands(bool leftHandEnabled, bool rightHandEnabled, bool hipsEnab
             usePoleVector = calculateElbowPoleVectorOptimized(handJointIndex, elbowJointIndex, armJointIndex, left, poleVector);
 #else
             usePoleVector = calculateElbowPoleVector(handJointIndex, elbowJointIndex, armJointIndex, oppositeArmJointIndex, poleVector);
-#endif            
+#endif
             if (usePoleVector) {
                 glm::vec3 sensorPoleVector = transformVectorFast(rigToSensorMatrix, poleVector);
                 _animVars.set("leftHandPoleVectorEnabled", true);
@@ -1944,7 +1942,7 @@ static float getHandPositionTheta(glm::vec3 armToHand, float defaultArmLength, b
     }
 
     handPositionTheta = xFactor + yFactor + zFactor;
-   
+
     const float LOWER_ANATOMICAL_ANGLE = 175.0f;
     const float UPPER_ANATOMICAL_ANGLE = 50.0f;
     if (handPositionTheta > LOWER_ANATOMICAL_ANGLE) {
@@ -1969,56 +1967,23 @@ static float computeUlnarRadialCompensation(float ulnarRadialTheta, float twistT
     float ulnarDiff = 0.0f;
     float ulnarCorrection = 0.0f;
     float currentWristCoefficient = 0.0f;
-    
+
     if (ulnarRadialTheta < ULNAR_BOUNDARY_LEFT) {
         ulnarDiff = ulnarRadialTheta - ULNAR_BOUNDARY_LEFT;
     } else if (ulnarRadialTheta > ULNAR_BOUNDARY_RIGHT) {
         ulnarDiff = ulnarRadialTheta - ULNAR_BOUNDARY_RIGHT;
     }
-   
-    /*
-    if (fabsf(ulnarDiff) > 0.0f) {
-        float twistCoefficient = 0.0f;
 
-        if (left) {
-            twistCoefficient = twistTheta;
-            if (fabsf(twistCoefficient) > (PI / 3.0f)) {
-                twistCoefficient = glm::sign(twistCoefficient) * (fabsf(twistCoefficient) - (PI / 3.0f)) / (PI / 6.0f);
-                //twistCoefficient = 1.0f;
-            } else {
-                twistCoefficient = 0.0f;
-            }
-        } else {
-            twistCoefficient = twistTheta;
-            if (fabsf(twistCoefficient) > (PI / 3.0f)) {
-                twistCoefficient = -1.0f * glm::sign(twistCoefficient) * (fabsf(twistCoefficient) - (PI / 3.0f)) / (PI / 6.0f);
-                //twistCoefficient = 1.0f;
-            } else {
-                twistCoefficient = 0.0f;
-            }
+    if (left) {
+        ulnarCorrection += glm::sign(ulnarDiff) * (fabsf(ulnarDiff) / PI) * 180.0f;
+    } else {
+        ulnarCorrection += glm::sign(ulnarDiff) * (fabsf(ulnarDiff) / PI) * 180.0f;
+    }
 
-        }
-        if (twistCoefficient > 1.0f) {
-            twistCoefficient = 1.0f;
-        }
-        float flexCoefficient = 1.0f;
-        //float upAndDown = fabsf(flexTheta) / (PI / 2.0f);
-        //float diffFromOne = 1.0f - upAndDown;
-        //flexCoefficient = glm::max(diffFromOne, 0.0f);
-        
-        */
-        if (left) {
-            ulnarCorrection += glm::sign(ulnarDiff) * (fabsf(ulnarDiff) / PI) * 180.0f;// *twistCoefficient * flexCoefficient;
-        } else {
-            ulnarCorrection += glm::sign(ulnarDiff) * (fabsf(ulnarDiff) / PI) * 180.0f;// *twistCoefficient * flexCoefficient;
-        }
+    if (fabsf(ulnarCorrection) > 30.0f) {
+        ulnarCorrection = glm::sign(ulnarCorrection) * 30.0f;
+    }
 
-        if (fabsf(ulnarCorrection) > 30.0f) {
-            ulnarCorrection = glm::sign(ulnarCorrection) * 30.0f;
-        }
-       // qCDebug(animation) << flexTheta << " " << flexCoefficient << " " << diffFromOne << " " << upAndDown << " " << ulnarCorrection << " " << twistCoefficient;
-
-    //}
     return ulnarCorrection;
 }
 
@@ -2028,19 +1993,11 @@ static float computeTwistCompensation(float twistTheta, bool left) {
     const float TWIST_LIMIT_COUNTER_CLOCKWISE = -3.0f * PI / 10.0f;
 
     float twistCorrection = 0.0f;
-    //if (left) {
-        if (twistTheta > TWIST_LIMIT_CLOCKWISE) {
-            twistCorrection =  ((twistTheta - TWIST_LIMIT_CLOCKWISE) / PI) * 60.0f;
-        } else if (twistTheta < TWIST_LIMIT_COUNTER_CLOCKWISE) {
-            twistCorrection = ((twistTheta - TWIST_LIMIT_COUNTER_CLOCKWISE) / PI) * 60.0f;
-        }
-    //} else {
-    //    if (twistTheta > TWIST_LIMIT_CLOCKWISE) {
-    //        twistCorrection = ((twistTheta - TWIST_LIMIT_CLOCKWISE) / PI) * 60.0f;
-    //    } else if (twistTheta < TWIST_LIMIT_COUNTER_CLOCKWISE) {
-    //        twistCorrection = ((twistTheta - TWIST_LIMIT_COUNTER_CLOCKWISE) / PI) * 60.0f;
-    //    }
-   // }
+    if (twistTheta > TWIST_LIMIT_CLOCKWISE) {
+        twistCorrection = ((twistTheta - TWIST_LIMIT_CLOCKWISE) / PI) * 60.0f;
+    } else if (twistTheta < TWIST_LIMIT_COUNTER_CLOCKWISE) {
+        twistCorrection = ((twistTheta - TWIST_LIMIT_COUNTER_CLOCKWISE) / PI) * 60.0f;
+    }
 
     // limit the twist correction
     if (fabsf(twistCorrection) > 30.0f) {
@@ -2059,27 +2016,20 @@ static float computeFlexCompensation(float flexTheta, float twistTheta, bool lef
     float dynamicFlexBoundary = FLEX_BOUNDARY * (((PI / 2.0f) - fabsf(twistTheta)) / (PI / 2.0f));
     float dynamicExtendBoundary = EXTEND_BOUNDARY * (((PI / 2.0f) - fabsf(twistTheta)) / (PI / 2.0f));
 
-    //if (fabsf(twistTheta) < (4.0f * PI / 10.0f)) {
-        if (flexTheta > FLEX_BOUNDARY) {
-            flexCorrection =  ((flexTheta - FLEX_BOUNDARY) / PI) * 180.0f;
-        } else if (flexTheta < EXTEND_BOUNDARY) {
-            flexCorrection =  ((flexTheta - EXTEND_BOUNDARY) / PI) * 180.0f;
-            //(((4.0f * PI / 10.0f) - fabsf(twistTheta)) / (4.0f * PI / 10.0f)) *
-        }
-        if (fabsf(flexCorrection) > 175.0f) {
-            flexCorrection = glm::sign(flexCorrection) * 175.0f;
-        }
-    //}
-        //qCDebug(animation) << "twistTheata in compute flex "  << twistTheta;
-    
-    if (left) {
-        //currentWristCoefficient += flexCorrection;
-    } else {
+    if (flexTheta > FLEX_BOUNDARY) {
+        flexCorrection = ((flexTheta - FLEX_BOUNDARY) / PI) * 180.0f;
+    } else if (flexTheta < EXTEND_BOUNDARY) {
+        flexCorrection = ((flexTheta - EXTEND_BOUNDARY) / PI) * 180.0f;
+    }
+    if (fabsf(flexCorrection) > 175.0f) {
+        flexCorrection = glm::sign(flexCorrection) * 175.0f;
+    }
+
+    if (!left) {
         flexCorrection *= -1.0f;
     }
-    
-    return flexCorrection;
 
+    return flexCorrection;
 }
 
 static float getAxisThetaFromRotation(glm::vec3 axis, glm::quat rotation) {
@@ -2157,7 +2107,7 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
     } else {
        elbow_pointing_vector = glm::normalize(elbowPose.xformVector(Vectors::UNIT_NEG_X));
     }
-    
+
     glm::vec3 refVectorProj = elbow_pointing_vector - glm::dot(elbow_pointing_vector, unitAxis) * unitAxis;
     float refVectorProjLength = glm::length(refVectorProj);
     glm::vec3 sideVector = glm::cross(unitAxis, elbow_pointing_vector);
@@ -2169,16 +2119,10 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
     float dot = glm::clamp(glm::dot(refVectorProj / refVectorProjLength, startPoleVector / glm::length(startPoleVector)), -1.0f, 1.0f);
     float thetaReset = copysignf(1.0f, sideDot) * acosf(dot);
 
-    
+
     glm::quat deltaReset = glm::angleAxis(thetaReset, unitAxis);
     glm::quat relBaseRot = glm::inverse(parentShoulderPose.rot()) * deltaReset * shoulderPose.rot();
-    if (!left) {
-        //qCDebug(animation) << " the dot of the start pole and the elbow pointer " << dot;
-        //qCDebug(animation) << " right shoulder after reset " << relBaseRot;
-    }
 
-    
- 
     AnimPose updatedAbsBase = parentShoulderPose * AnimPose(relBaseRot,glm::vec3());
     AnimPose relMid = shoulderPose.inverse() * elbowPose;
     AnimPose newAbsMid = updatedAbsBase * relMid;
@@ -2294,19 +2238,17 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
     const float LOWER_ANATOMICAL_ANGLE = 175.0f;
     const float UPPER_ANATOMICAL_ANGLE = 80.0f;
 
-    // make the lower boundary vary with the body 
+    // make the lower boundary vary with the body
     float lowerBoundary = LOWER_ANATOMICAL_ANGLE;
     if (fabsf(positionalTheta) < LOWER_ANATOMICAL_ANGLE) {
         //lowerBoundary = positionalTheta;
     }
-
     float thetaRadians = 0.0f;
     if (left) {
 
         if (_lastThetaLeft > -UPPER_ANATOMICAL_ANGLE) {
             _lastThetaLeft = -UPPER_ANATOMICAL_ANGLE;
         }
-
         if (_lastThetaLeft < -lowerBoundary) {
             _lastThetaLeft = -lowerBoundary;
         }
@@ -2318,17 +2260,16 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
         if (_lastThetaRight < UPPER_ANATOMICAL_ANGLE) {
             _lastThetaRight = UPPER_ANATOMICAL_ANGLE;
         }
-        if (_lastThetaRight > LOWER_ANATOMICAL_ANGLE) {
-            _lastThetaRight = LOWER_ANATOMICAL_ANGLE;
+        if (_lastThetaRight > lowerBoundary) {
+            _lastThetaRight = lowerBoundary;
         }
         // convert to radians and make 180 0 to match pole vector theta
         thetaRadians = ((_lastThetaRight - 90.0f) / 180.0f)*PI;
     }
-  
-   
+
     glm::quat testRotTheta(glm::cos(thetaRadians/2.0f), 0.0f, 0.0f, glm::sin(thetaRadians/2.0f));
 
-    glm::vec3 up =  Vectors::UNIT_Y; 
+    glm::vec3 up =  Vectors::UNIT_Y;
     glm::vec3 fwd = armToHand / glm::length(armToHand);
 
     glm::vec3 u, v, w;
@@ -2344,19 +2285,10 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
         _lastPoleVectorRight = poleVectorRot;
         poleVector = poleVectorRot * Vectors::UNIT_NEG_X;
     }
-    /*
-    if (left) {
-        poleVector = glm::slerp(poleVector, _lastPoleVectorLeft, 0.8f);
-        _lastPoleVectorLeft = poleVector;
-    } else {
-        poleVector = glm::slerp(poleVector, _lastPoleVectorRight, 0.8f);
-        _lastPoleVectorRight = poleVector;
-    }
-    */
-
 
     return  true;
 }
+
 
 bool Rig::calculateElbowPoleVector(int handIndex, int elbowIndex, int armIndex, int oppositeArmIndex, glm::vec3& poleVector) const {
     // The resulting Pole Vector is calculated as the sum of a three vectors.
