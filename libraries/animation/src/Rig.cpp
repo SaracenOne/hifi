@@ -1974,17 +1974,13 @@ static float getHandPositionTheta(glm::vec3 armToHand, float defaultArmLength, b
         handPositionTheta *= -1.0f;
     }
 
-    //qCDebug(animation) << "xfactor" << xFactor << "yfactor" << yFactor << "zfactor" << zFactor << "total" << handPositionTheta;
-
     return handPositionTheta;
 }
 
 static float computeUlnarRadialCompensation(float ulnarRadialTheta, float twistTheta, float flexTheta, bool left) {
     const float ULNAR_BOUNDARY_LEFT = -PI / 7.0f;
-    const float ULNAR_BOUNDARY_RIGHT = PI / 4.0f;
+    const float ULNAR_BOUNDARY_RIGHT = PI / 5.0f;
     float ulnarDiff = 0.0f;
-    float ulnarCorrection = 0.0f;
-    float currentWristCoefficient = 0.0f;
 
     if (ulnarRadialTheta < ULNAR_BOUNDARY_LEFT) {
         ulnarDiff = ulnarRadialTheta - ULNAR_BOUNDARY_LEFT;
@@ -1992,12 +1988,7 @@ static float computeUlnarRadialCompensation(float ulnarRadialTheta, float twistT
         ulnarDiff = ulnarRadialTheta - ULNAR_BOUNDARY_RIGHT;
     }
 
-    if (left) {
-        ulnarCorrection += glm::sign(ulnarDiff) * (fabsf(ulnarDiff) / PI) * 180.0f;
-    } else {
-        ulnarCorrection += glm::sign(ulnarDiff) * (fabsf(ulnarDiff) / PI) * 180.0f;
-    }
-
+    float ulnarCorrection = glm::sign(ulnarDiff) * (fabsf(ulnarDiff) / PI) * 150.0f;
     if (fabsf(ulnarCorrection) > 30.0f) {
         ulnarCorrection = glm::sign(ulnarCorrection) * 30.0f;
     }
@@ -2007,7 +1998,7 @@ static float computeUlnarRadialCompensation(float ulnarRadialTheta, float twistT
 
 static float computeTwistCompensation(float twistTheta, bool left) {
 
-    const float TWIST_LIMIT_CLOCKWISE = 6.0f * PI / 20.0f;//was 7.0f
+    const float TWIST_LIMIT_CLOCKWISE = 6.0f * PI / 20.0f;
     const float TWIST_LIMIT_COUNTER_CLOCKWISE = -3.0f * PI / 10.0f;
 
     float twistCorrection = 0.0f;
@@ -2028,11 +2019,8 @@ static float computeTwistCompensation(float twistTheta, bool left) {
 static float computeFlexCompensation(float flexTheta, float twistTheta, bool left) {
 
     const float FLEX_BOUNDARY = PI / 6.0f;
-    const float EXTEND_BOUNDARY = -5.0f * PI / 20.0f; // was -4.0f
+    const float EXTEND_BOUNDARY = -5.0f * PI / 20.0f;
     float flexCorrection = 0.0f;
-    float currentWristCoefficient = 0.0f;
-    float dynamicFlexBoundary = FLEX_BOUNDARY * (((PI / 2.0f) - fabsf(twistTheta)) / (PI / 2.0f));
-    float dynamicExtendBoundary = EXTEND_BOUNDARY * (((PI / 2.0f) - fabsf(twistTheta)) / (PI / 2.0f));
 
     if (flexTheta > FLEX_BOUNDARY) {
         flexCorrection = ((flexTheta - FLEX_BOUNDARY) / PI) * 180.0f;
@@ -2078,13 +2066,13 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
     float defaultArmLength = glm::length(absoluteHandPose.trans() - absoluteShoulderPose.trans());
 
     glm::vec3 armToHand = handPose.trans() - shoulderPose.trans();
-    glm::vec3 unitAxis;
+    glm::vec3 unitAxis = Vectors::UNIT_Y;
     float axisLength = glm::length(armToHand);
-    if (axisLength > 0.0f) {
+    if (axisLength > EPSILON) {
         unitAxis = armToHand / axisLength;
     }
-
-    qCDebug(animation) << "arm to hand "<<  armToHand << " in shoulder space " <<  glm::inverse(parentShoulderPose.rot()) * armToHand;
+    //qCDebug(animation) << "arm to hand "<<  armToHand << " in shoulder space " <<  glm::inverse(parentShoulderPose.rot()) * armToHand;
+    // if hand behind torso then turn off the pole vector
     glm::vec3 shoulderSpaceArmHand = glm::inverse(parentShoulderPose.rot()) * armToHand;
     if (left) {
         if ((shoulderSpaceArmHand.x > -0.10f)) {
@@ -2095,11 +2083,14 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
             return false;
         }
     }
+    if (fabsf(glm::dot(unitAxis, Vectors::UNIT_Y)) > 0.95f ) {
+        return false;
+    }
 
     // get the pole vector theta based on the hand position relative to the shoulder.
     float positionalTheta = getHandPositionTheta(armToHand, defaultArmLength, left);
 
-    // initial pole vector correction to do the wrists
+    // turn the postion theta into an underpose to compute the wrist theta
     float posThetaRadians;
     if (left) {
         posThetaRadians = ((positionalTheta + 90.0f) / 180.0f) * PI;
@@ -2109,7 +2100,7 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
     glm::quat resetRotTheta(glm::cos(posThetaRadians / 2.0f), 0.0f, 0.0f, glm::sin(posThetaRadians / 2.0f));
 
     glm::vec3 u7, v7, w7;
-    generateBasisVectors(unitAxis, glm::vec3(0.0f,1.0f,0.0f), u7, v7, w7);
+    generateBasisVectors(unitAxis, Vectors::UNIT_Y, u7, v7, w7);
     AnimPose facingUnitAxisPose(glm::mat4(glm::vec4(-w7, 0.0f), glm::vec4(v7, 0.0f), glm::vec4(u7, 0.0f), glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f)));
     glm::vec3 startPoleVector;
     if (left) {
@@ -2163,13 +2154,6 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
     }
     nonTwistAxis = glm::inverse(twistAxis) * nonTwistAxis * twistAxis;
 
-    glm::quat flexAxis;
-    glm::quat nonFlexAxis;
-    swingTwistDecomposition(nonTwistAxis, FLEX_ROTATION_AXIS, nonFlexAxis, flexAxis);
-    if (flexAxis.w < 0.0f) {
-        flexAxis *= -1.0f;
-    }
-
     if (left) {
         DebugDraw::getInstance().addMarker("handpose", handPose.rot(), handPose.trans(), glm::vec4(1));
         DebugDraw::getInstance().addMarker("twist", twistAxis, glm::vec3(handPose.trans().x, handPose.trans().y + 0.3f, handPose.trans().z), glm::vec4(1));
@@ -2199,9 +2183,9 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
 
         // put some smoothing on the thetas
         _ulnarRadialThetaRunningAverageLeft = ulnarDeviationTheta;
-        _flexThetaRunningAverageLeft = SMOOTHING_COEFFICIENT * _flexThetaRunningAverageLeft + (1.0f - SMOOTHING_COEFFICIENT) * flexTheta;
-        _twistThetaRunningAverageLeft = SMOOTHING_COEFFICIENT * _twistThetaRunningAverageLeft + (1.0f - SMOOTHING_COEFFICIENT) * trueTwistTheta;
-        //qCDebug(animation) << "twist " << trueTwistTheta << " flex " << flexTheta << " ulnar " << ulnarDeviationTheta;
+        _flexThetaRunningAverageLeft =  flexTheta;
+        _twistThetaRunningAverageLeft = trueTwistTheta;
+        qCDebug(animation) << "twist " << trueTwistTheta << " flex " << flexTheta << " ulnar " << ulnarDeviationTheta;
 
     } else {
 
@@ -2219,10 +2203,10 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
         }
 
         // put some smoothing on the thetas
-        _twistThetaRunningAverageRight = SMOOTHING_COEFFICIENT * _twistThetaRunningAverageRight + (1.0f - SMOOTHING_COEFFICIENT) * trueTwistTheta;
-        _flexThetaRunningAverageRight = SMOOTHING_COEFFICIENT * _flexThetaRunningAverageRight + (1.0f - SMOOTHING_COEFFICIENT) * flexTheta;
+        _twistThetaRunningAverageRight =  trueTwistTheta;
+        _flexThetaRunningAverageRight = flexTheta;
         _ulnarRadialThetaRunningAverageRight = ulnarDeviationTheta;
-        qCDebug(animation) << "twist " << trueTwistTheta << " flex " << flexTheta << " ulnar " << ulnarDeviationTheta;
+        //qCDebug(animation) << "twist " << trueTwistTheta << " flex " << flexTheta << " ulnar " << ulnarDeviationTheta;
     }
 
 
@@ -2266,7 +2250,6 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
             _lastThetaLeft = -lowerBoundary;
         }
         // convert to radians and make 180 0 to match pole vector theta
-        //qCDebug(animation) << " last theta " << _lastThetaLeft;
         thetaRadians = ((_lastThetaLeft + 90.0f) / 180.0f)*PI;
     } else {
 
@@ -2280,21 +2263,22 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
         thetaRadians = ((_lastThetaRight - 90.0f) / 180.0f)*PI;
     }
 
-    glm::quat testRotTheta(glm::cos(thetaRadians/2.0f), 0.0f, 0.0f, glm::sin(thetaRadians/2.0f));
+    glm::quat thetaRotation(glm::cos(thetaRadians/2.0f), 0.0f, 0.0f, glm::sin(thetaRadians/2.0f));
 
     glm::vec3 up =  Vectors::UNIT_Y;
-    glm::vec3 fwd = armToHand / glm::length(armToHand);
+    glm::vec3 fwd = unitAxis;
 
     glm::vec3 u, v, w;
     generateBasisVectors(fwd, up, u, v, w);
     AnimPose armAxisPose(glm::mat4(glm::vec4(-w, 0.0f), glm::vec4(v, 0.0f), glm::vec4(u, 0.0f), glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f)));
 
+    qCDebug(animation) << "the pole vector rotation is " << armAxisPose.rot()*thetaRotation;
     if (left) {
-        glm::quat poleVectorRot = safeLerp(armAxisPose.rot()*testRotTheta, _lastPoleVectorLeft, 0.8f);
+        glm::quat poleVectorRot = safeLerp(armAxisPose.rot()*thetaRotation, _lastPoleVectorLeft, 0.8f);
         _lastPoleVectorLeft = poleVectorRot;
         poleVector = poleVectorRot * Vectors::UNIT_X;
     } else {
-        glm::quat poleVectorRot = safeLerp(armAxisPose.rot()*testRotTheta, _lastPoleVectorRight, 0.8f);
+        glm::quat poleVectorRot = safeLerp(armAxisPose.rot()*thetaRotation, _lastPoleVectorRight, 0.8f);
         _lastPoleVectorRight = poleVectorRot;
         poleVector = poleVectorRot * Vectors::UNIT_NEG_X;
     }
