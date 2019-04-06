@@ -77,9 +77,9 @@ void TestRunnerDesktop::setWorkingFolderAndEnableControls() {
     setWorkingFolder(_workingFolderLabel);
 
 #ifdef Q_OS_WIN
-    _installationFolder = _workingFolder + "/High Fidelity";
+    _installationFolder = _workingFolder + "/IsekaiVR";
 #elif defined Q_OS_MAC
-    _installationFolder = _workingFolder + "/High_Fidelity";
+    _installationFolder = _workingFolder + "/IsekaiVR";
 #endif
 
     nitpick->enableRunTabControls();
@@ -260,7 +260,7 @@ void TestRunnerDesktop::runInstaller() {
     script.write("#!/bin/sh\n\n");
     script.write("VOLUME=`hdiutil attach \"$1\" | grep Volumes | awk '{print $3}'`\n");
     
-    QString folderName {"High Fidelity"};
+    QString folderName {"IsekaiVR"};
     if (!_runLatest->isChecked()) {
         folderName += QString(" - ") + getPRNumberFromURL(_url->text());
     }
@@ -303,10 +303,10 @@ void TestRunnerDesktop::verifyInstallationSucceeded() {
     if (!interfaceExe.exists() || !assignmentClientExe.exists() || !domainServerExe.exists()) {
         if (_runLatest->isChecked()) {
             // On Windows, the reason is probably that UAC has blocked the installation.  This is treated as a critical error
-            QMessageBox::critical(0, "Installation of High Fidelity has failed", "Please verify that UAC has been disabled");
+            QMessageBox::critical(0, "Installation of IsekaiVR has failed", "Please verify that UAC has been disabled");
             exit(-1);
         } else {
-            QMessageBox::critical(0, "Installation of High Fidelity not found", "Please verify that working folder contains a proper installation");
+            QMessageBox::critical(0, "Installation of IsekaiVR not found", "Please verify that working folder contains a proper installation");
         }
     }
 #endif
@@ -320,10 +320,10 @@ void TestRunnerDesktop::saveExistingHighFidelityAppDataFolder() {
     dataDirectory = QDir::homePath() + "/Library/Application Support";
 #endif
     if (_runLatest->isChecked()) {
-        _appDataFolder = dataDirectory + "/High Fidelity";
+        _appDataFolder = dataDirectory + "/IsekaiVR";
     } else {
         // We are running a PR build
-        _appDataFolder = dataDirectory + "/High Fidelity - " + getPRNumberFromURL(_url->text());
+        _appDataFolder = dataDirectory + "/IsekaiVR - " + getPRNumberFromURL(_url->text());
     }
 
     _savedAppDataFolder = dataDirectory + "/" + UNIQUE_FOLDER_NAME;

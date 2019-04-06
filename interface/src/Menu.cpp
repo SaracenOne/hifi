@@ -847,8 +847,8 @@ Menu::Menu() {
     // Help/Application menu ----------------------------------
     MenuWrapper * helpMenu = addMenu("Help");
 
-    // Help > About High Fidelity
-    action = addActionToQMenuAndActionHash(helpMenu, "About High Fidelity");
+    // Help > About IsekaiVR
+    action = addActionToQMenuAndActionHash(helpMenu, "About IsekaiVR");
     connect(action, &QAction::triggered, [] {
         qApp->showDialog(QString("hifi/dialogs/AboutDialog.qml"),
             QString("hifi/dialogs/TabletAboutDialog.qml"), "AboutDialog");
