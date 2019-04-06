@@ -2132,7 +2132,6 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
     glm::vec3 refVectorProj = elbow_pointing_vector - glm::dot(elbow_pointing_vector, unitAxis) * unitAxis;
     float refVectorProjLength = glm::length(refVectorProj);
     glm::vec3 sideVector = glm::cross(unitAxis, elbow_pointing_vector);
-    float sideVectorLength = glm::length(sideVector);
     float sideDot = 1.0f;
     if (glm::length(sideVector) > EPSILON) {
         sideDot = glm::dot(startPoleVector, sideVector);
@@ -2172,7 +2171,6 @@ bool Rig::calculateElbowPoleVectorOptimized(int handIndex, int elbowIndex, int s
     float trueTwistTheta = getAxisThetaFromRotation(TWIST_ROTATION_AXIS, relativeHandRotation);
 
     const float HALFWAY_ANGLE = PI / 2.0f;
-    const float SMOOTHING_COEFFICIENT = 0.5f;
     if (left) {
 
         if (glm::sign(ulnarDeviationTheta) != glm::sign(_ulnarRadialThetaRunningAverageLeft) && fabsf(ulnarDeviationTheta) > HALFWAY_ANGLE) {
