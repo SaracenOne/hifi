@@ -38,12 +38,12 @@ if (APPLE)
     set_target_properties(${this_target} PROPERTIES MACOSX_BUNDLE_INFO_PLIST MacOSXBundleInfo.plist.in)
 
     if (PRODUCTION_BUILD)
-        set(MACOSX_BUNDLE_GUI_IDENTIFIER com.highfidelity.nitpick)
+        set(MACOSX_BUNDLE_GUI_IDENTIFIER com.isekaivr.nitpick)
     else ()
         if (DEV_BUILD)
-            set(MACOSX_BUNDLE_GUI_IDENTIFIER com.highfidelity.nitpick-dev)
+            set(MACOSX_BUNDLE_GUI_IDENTIFIER com.isekaivr.nitpick-dev)
         elseif (PR_BUILD)
-            set(MACOSX_BUNDLE_GUI_IDENTIFIER com.highfidelity.nitpick-pr)
+            set(MACOSX_BUNDLE_GUI_IDENTIFIER com.isekaivr.nitpick-pr)
         endif ()
     endif ()
 
@@ -143,7 +143,7 @@ if (UNIX AND NOT ANDROID)
     endif ()
 endif()
 
-# add a custom command to copy the empty AppData High Fidelity folder (i.e. - a valid folder with no entities)
+# add a custom command to copy the empty AppData IsekaiVR folder (i.e. - a valid folder with no entities)
 if (WIN32)
     add_custom_command(
         TARGET ${TARGET_NAME}
