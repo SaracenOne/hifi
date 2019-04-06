@@ -34,6 +34,8 @@
 #include "IKTarget.h"
 #include "PathUtils.h"
 
+#define HIFI_USE_OPTIMIZED_IK
+
 static int nextRigId = 1;
 static std::map<int, Rig*> rigRegistry;
 static std::mutex rigRegistryMutex;
