@@ -32,6 +32,8 @@ Material::Material() {
 
 Material::Material(const Material& material) :
     _name(material._name),
+    _alphaMode(material._alphaMode),
+    _cullMode(material._cullMode),
     _model(material._model),
     _key(material._key),
     _emissive(material._emissive),
@@ -53,6 +55,8 @@ Material& Material::operator=(const Material& material) {
     QMutexLocker locker(&_textureMapsMutex);
 
     _name = material._name;
+    _alphaMode = material._alphaMode;
+    _cullMode = material._cullMode;
     _model = material._model;
     _key = material._key;
     _emissive = material._emissive;
@@ -70,6 +74,13 @@ Material& Material::operator=(const Material& material) {
     _propertyFallthroughs = material._propertyFallthroughs;
 
     return (*this);
+}
+
+void Material::setAlphaMode(const MaterialAlphaMode alphaMode) {
+    if (alphaMode != _alphaMode) {
+        _alphaMode = alphaMode;
+        resetOpacityMap();
+    }
 }
 
 void Material::setEmissive(const glm::vec3& emissive, bool isSRGB) {
@@ -144,6 +155,10 @@ void Material::resetOpacityMap() const {
     _key.setOpacityMaskMap(false);
     _key.setTranslucentMap(false);
 
+    if (_alphaMode == MAT_OPAQUE) {
+        return;
+    }
+
     const auto& textureMap = getTextureMap(MaterialKey::ALBEDO_MAP);
     if (textureMap &&
         textureMap->useAlphaChannel() &&
@@ -152,7 +167,7 @@ void Material::resetOpacityMap() const {
 
         auto usage = textureMap->getTextureView()._texture->getUsage();
         if (usage.isAlpha()) {
-            if (usage.isAlphaMask()) {
+            if (usage.isAlphaMask() || _alphaMode == MAT_MASK) {
                 // Texture has alpha, but it is just a mask
                 _key.setOpacityMaskMap(true);
                 _key.setTranslucentMap(false);

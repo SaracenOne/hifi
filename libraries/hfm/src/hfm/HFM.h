@@ -159,19 +159,66 @@ public:
     QString materialID;
 };
 
+namespace AlphaMode {
+    enum Values {
+        HFM_BLEND = 0,
+        HFM_MASK,
+        HFM_OPAQUE,
+    };
+
+    static QString ToString(Values alphaMode) {
+        switch (alphaMode) {
+            case HFM_BLEND:
+                return "BLEND";
+            case HFM_MASK:
+                return "MASK";
+            case HFM_OPAQUE:
+                return "OPAQUE";
+            default:
+                return "INVALID";
+        };
+    };
+};
+
+namespace CullMode {
+    enum Values {
+        HFM_BACK = 0,
+        HFM_FRONT,
+        HFM_DISABLED,
+    };
+
+    static QString ToString(Values cullMode) {
+        switch (cullMode) {
+            case HFM_BACK:
+                return "BACK";
+            case HFM_FRONT:
+                return "FRONT";
+            case HFM_DISABLED:
+                return "DISABLED";
+            default:
+                return "INVALID";
+        };
+    };
+};
+
 class Material {
 public:
     Material() {};
     Material(const glm::vec3& diffuseColor, const glm::vec3& specularColor, const glm::vec3& emissiveColor,
-         float shininess, float opacity) :
+         float shininess, float opacity, AlphaMode::Values alphaMode, CullMode::Values cullMode) :
         diffuseColor(diffuseColor),
         specularColor(specularColor),
         emissiveColor(emissiveColor),
         shininess(shininess),
-        opacity(opacity)  {}
+        opacity(opacity),
+        alphaMode(alphaMode),
+        cullMode(cullMode) {}
 
     void getTextureNames(QSet<QString>& textureList) const;
     void setMaxNumPixelsPerTexture(int maxNumPixels);
+
+    AlphaMode::Values alphaMode{ AlphaMode::HFM_BLEND };
+    CullMode::Values cullMode{ CullMode::HFM_BACK };
 
     glm::vec3 diffuseColor{ 1.0f };
     float diffuseFactor{ 1.0f };

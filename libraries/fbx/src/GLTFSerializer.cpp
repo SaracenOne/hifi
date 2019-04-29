@@ -228,15 +228,15 @@ int GLTFSerializer::getAccessorType(const QString& type)
 int GLTFSerializer::getMaterialAlphaMode(const QString& type)
 {
     if (type == "OPAQUE") {
-        return GLTFMaterialAlphaMode::OPAQUE;
+        return GLTFMaterialAlphaMode::GLTF_OPAQUE;
     }
     if (type == "MASK") {
-        return GLTFMaterialAlphaMode::MASK;
+        return GLTFMaterialAlphaMode::GLTF_MASK;
     }
     if (type == "BLEND") {
-        return GLTFMaterialAlphaMode::BLEND;
+        return GLTFMaterialAlphaMode::GLTF_BLEND;
     }
-    return GLTFMaterialAlphaMode::OPAQUE;
+    return GLTFMaterialAlphaMode::GLTF_OPAQUE;
 }
 
 int GLTFSerializer::getCameraType(const QString& type)
@@ -1744,6 +1744,31 @@ HFMTexture GLTFSerializer::getHFMTexture(const GLTFTexture& texture) {
 void GLTFSerializer::setHFMMaterial(HFMMaterial& fbxmat, const GLTFMaterial& material) {
 
 
+    if (material.defined["alphaMode"]) {
+        switch (material.alphaMode) {
+            case GLTFMaterialAlphaMode::GLTF_OPAQUE:
+                fbxmat.alphaMode = hfm::AlphaMode::HFM_OPAQUE;
+                break;
+            case GLTFMaterialAlphaMode::GLTF_MASK:
+                fbxmat.alphaMode = hfm::AlphaMode::HFM_MASK;
+                break;
+            case GLTFMaterialAlphaMode::GLTF_BLEND:
+                fbxmat.alphaMode = hfm::AlphaMode::HFM_BLEND;
+                break;
+            default:
+                fbxmat.alphaMode = hfm::AlphaMode::HFM_OPAQUE;
+                break;
+        }
+    } else {
+        fbxmat.alphaMode = hfm::AlphaMode::HFM_OPAQUE;
+    }
+
+    if (material.defined["cullMode"]) {
+        fbxmat.cullMode = material.doubleSided ? hfm::CullMode::HFM_DISABLED : hfm::CullMode::HFM_BACK;
+    } else {
+        fbxmat.cullMode = hfm::CullMode::HFM_BACK;
+    }
+    
     if (material.defined["emissiveFactor"] && material.emissiveFactor.size() == 3) {
         glm::vec3 emissive = glm::vec3(material.emissiveFactor[0], 
                                        material.emissiveFactor[1], 
@@ -2074,6 +2099,8 @@ void GLTFSerializer::hfmDebugDump(const HFMModel& hfmModel) {
     foreach(HFMMaterial mat, hfmModel.materials) {
         qCDebug(modelformat) << "\n";
         qCDebug(modelformat) << "  mat.materialID =" << mat.materialID;
+        qCDebug(modelformat) << "  alphaMode =" << hfm::AlphaMode::ToString(mat.alphaMode);
+        qCDebug(modelformat) << "  cullMode =" << hfm::CullMode::ToString(mat.cullMode);
         qCDebug(modelformat) << "  diffuseColor =" << mat.diffuseColor;
         qCDebug(modelformat) << "  diffuseFactor =" << mat.diffuseFactor;
         qCDebug(modelformat) << "  specularColor =" << mat.specularColor;

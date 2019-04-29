@@ -418,9 +418,9 @@ struct GLTFpbrMetallicRoughness {
 
 namespace GLTFMaterialAlphaMode {
     enum Values {
-        OPAQUE = 0,
-        MASK,
-        BLEND
+        GLTF_OPAQUE = 0,
+        GLTF_MASK,
+        GLTF_BLEND
     };
 };
 

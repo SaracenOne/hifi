@@ -320,6 +320,50 @@ public:
     const std::string& getName() const { return _name; }
     void setName(const std::string& name) { _name = name; }
 
+    enum MaterialAlphaMode
+    {
+        MAT_BLEND = 0,
+        MAT_MASK,
+        MAT_OPAQUE,
+    };
+
+    static MaterialAlphaMode AlphaModeFromString(const std::string& alphaMode) {
+        if (alphaMode == "BLEND" || alphaMode == "Blend" || alphaMode == "blend") {
+            return MAT_BLEND;
+        } else if (alphaMode == "MASK" || alphaMode == "Mask" || alphaMode == "mask") {
+            return MAT_MASK;
+        } else if (alphaMode == "OPAQUE" || alphaMode == "Opaque" || alphaMode == "opaque") {
+            return MAT_OPAQUE;
+        } else {
+            return MAT_BLEND;
+        }
+    };
+
+    const MaterialAlphaMode getAlphaMode() const { return _alphaMode; }
+    void setAlphaMode(const MaterialAlphaMode alphaMode);
+
+    enum MaterialCullMode
+    {
+        MAT_BACK = 0,
+        MAT_FRONT,
+        MAT_DISABLED
+    };
+
+    static MaterialCullMode CullModeFromString(const std::string& cullMode) {
+        if (cullMode == "BACK" || cullMode == "Back" || cullMode == "back") {
+            return MAT_BACK;
+        } else if (cullMode == "FRONT" || cullMode == "Front" || cullMode == "front") {
+            return MAT_FRONT;
+        } else if (cullMode == "DISABLED" || cullMode == "Disabled" || cullMode == "disabled") {
+            return MAT_DISABLED;
+        } else {
+            return MAT_BACK;
+        }
+    };
+
+    const MaterialCullMode getCullMode() const { return _cullMode; }
+    void setCullMode(const MaterialCullMode cullMode) { _cullMode = cullMode; }
+
     const std::string& getModel() const { return _model; }
     void setModel(const std::string& model) { _model = model; }
 
@@ -345,7 +389,8 @@ public:
 
 protected:
     std::string _name { "" };
-
+    MaterialAlphaMode _alphaMode { MAT_BLEND };
+    MaterialCullMode _cullMode { MAT_BACK };
 private:
     std::string _model { "hifi_pbr" };
     mutable MaterialKey _key { 0 };

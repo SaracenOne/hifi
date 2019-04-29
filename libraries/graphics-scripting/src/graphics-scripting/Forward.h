@@ -29,6 +29,8 @@ namespace scriptable {
     using MeshPointer = std::shared_ptr<scriptable::Mesh>;
     using WeakMeshPointer = std::weak_ptr<scriptable::Mesh>;
 
+    using Material = graphics::Material;
+
     class ScriptableModelBase;
     using ScriptableModelBasePointer = QPointer<ScriptableModelBase>;
 
@@ -39,6 +41,8 @@ namespace scriptable {
     /**jsdoc
      * @typedef {object} Graphics.Material
      * @property {string} name
+     * @property {string} alphaMode
+     * @property {string} cullMode
      * @property {string} model
      * @property {number|string} opacity
      * @property {number|string} roughness
@@ -73,6 +77,8 @@ namespace scriptable {
         ScriptableMaterial& operator=(const ScriptableMaterial& material);
 
         QString name;
+        Material::MaterialAlphaMode alphaMode;
+        Material::MaterialCullMode cullMode;
         QString model;
         float opacity;
         float roughness;
