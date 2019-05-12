@@ -1526,6 +1526,7 @@ HFMModel* FBXSerializer::extractHFMModel(const hifi::VariantHash& mapping, const
             extracted.mesh.clusterIndices.fill(extracted.mesh.clusters.size() - 1, numClusterIndices);
             QVector<float> weightAccumulators;
             weightAccumulators.fill(0.0f, numClusterIndices);
+            int rootSkeletonJoint = 0;
 
             for (int i = 0; i < clusterIDs.size(); i++) {
                 QString clusterID = clusterIDs.at(i);
@@ -1533,6 +1534,15 @@ HFMModel* FBXSerializer::extractHFMModel(const hifi::VariantHash& mapping, const
                 const HFMCluster& hfmCluster = extracted.mesh.clusters.at(i);
                 int jointIndex = hfmCluster.jointIndex;
                 HFMJoint& joint = hfmModel.joints[jointIndex];
+
+                // Record the joint index to be used for unweighted vertices
+                if (joint.parentIndex == -1) {
+                    rootSkeletonJoint = i;
+                } else {
+                    if (hfmModel.joints[joint.parentIndex].isSkeletonJoint == false) {
+                        rootSkeletonJoint = i;
+                    }
+                }
 
                 glm::mat4 meshToJoint = glm::inverse(joint.bindTransform) * modelTransform;
                 ShapeVertices& points = hfmModel.shapeVertices.at(jointIndex);
@@ -1599,6 +1609,7 @@ HFMModel* FBXSerializer::extractHFMModel(const hifi::VariantHash& mapping, const
                     }
                 } else {
                     extracted.mesh.clusterWeights[j] = (uint16_t)((float)(UINT16_MAX) + ALMOST_HALF);
+                    extracted.mesh.clusterIndices[j] = rootSkeletonJoint;
                 }
             }
         } else {
