@@ -1521,9 +1521,28 @@ HFMModel* FBXSerializer::extractHFMModel(const hifi::VariantHash& mapping, const
         // whether we're skinned depends on how many clusters are attached
         if (clusterIDs.size() > 1) {
             // this is a multi-mesh joint
+
+            // Record the joint index to be used for unweighted vertices
+            int rootSkeletonJoint = extracted.mesh.clusters.size() - 1;
+            for (int i = 0; i < clusterIDs.size(); i++) {
+                QString clusterID = clusterIDs.at(i);
+                const Cluster& cluster = clusters[clusterID];
+                const HFMCluster& hfmCluster = extracted.mesh.clusters.at(i);
+                int jointIndex = hfmCluster.jointIndex;
+                HFMJoint& joint = hfmModel.joints[jointIndex];
+
+                if (joint.parentIndex == -1) {
+                    rootSkeletonJoint = i;
+                } else {
+                    if (hfmModel.joints[joint.parentIndex].isSkeletonJoint == false) {
+                        rootSkeletonJoint = i;
+                    }
+                }
+            }
+
             const int WEIGHTS_PER_VERTEX = 4;
             int numClusterIndices = extracted.mesh.vertices.size() * WEIGHTS_PER_VERTEX;
-            extracted.mesh.clusterIndices.fill(clusterIDs.size() - 1, numClusterIndices);
+            extracted.mesh.clusterIndices.fill(rootSkeletonJoint, numClusterIndices);
             QVector<float> weightAccumulators;
             weightAccumulators.fill(0.0f, numClusterIndices);
 
