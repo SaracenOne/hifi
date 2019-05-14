@@ -45,7 +45,7 @@ Rectangle {
         }
         Item { height: 10; width: 1 }
         RalewayRegular {
-            text: "An open-source virtual reality platform."
+            text: "A community-driven fork of High Fidelity."
             size: 20
             color: "white"
         }
