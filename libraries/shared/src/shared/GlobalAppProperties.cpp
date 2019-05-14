@@ -10,19 +10,19 @@
 
 namespace hifi { namespace properties {
 
-    const char* CRASHED = "com.highfidelity.crashed";
-    const char* STEAM = "com.highfidelity.launchedFromSteam";
-    const char* LOGGER = "com.highfidelity.logger";
-    const char* OCULUS_STORE = "com.highfidelity.oculusStore";
-    const char* STANDALONE = "com.highfidelity.standalone";
-    const char* TEST = "com.highfidelity.test";
-    const char* TRACING = "com.highfidelity.tracing";
-    const char* HMD = "com.highfidelity.hmd";
-    const char* APP_LOCAL_DATA_PATH = "com.highfidelity.appLocalDataPath";
+    const char* CRASHED = "com.isekaivr.crashed";
+    const char* STEAM = "com.isekaivr.launchedFromSteam";
+    const char* LOGGER = "com.isekaivr.logger";
+    const char* OCULUS_STORE = "com.isekaivr.oculusStore";
+    const char* STANDALONE = "com.isekaivr.standalone";
+    const char* TEST = "com.isekaivr.test";
+    const char* TRACING = "com.isekaivr.tracing";
+    const char* HMD = "com.isekaivr.hmd";
+    const char* APP_LOCAL_DATA_PATH = "com.isekaivr.appLocalDataPath";
 
     namespace gl {
-        const char* BACKEND = "com.highfidelity.gl.backend";
-        const char* PRIMARY_CONTEXT = "com.highfidelity.gl.primaryContext";
+        const char* BACKEND = "com.isekaivr.gl.backend";
+        const char* PRIMARY_CONTEXT = "com.isekaivr.gl.primaryContext";
     }
 
 } }

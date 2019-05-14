@@ -352,7 +352,7 @@ bool QmlCommerce::installApp(const QString& itemHref, const bool& alsoOpenImmedi
             return false;
         }
 
-        // Copy the .app.json to the apps directory inside %AppData%/High Fidelity/Interface
+        // Copy the .app.json to the apps directory inside %AppData%/IsekaiVR/Interface
         auto requestData = request->getData();
         QFile appFile(_appsPath + "/" + appHref.fileName());
         if (!appFile.open(QIODevice::WriteOnly)) {
