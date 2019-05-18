@@ -33,7 +33,6 @@ Material::Material() {
 Material::Material(const Material& material) :
     _name(material._name),
     _alphaMode(material._alphaMode),
-    _cullMode(material._cullMode),
     _model(material._model),
     _key(material._key),
     _emissive(material._emissive),
@@ -56,7 +55,6 @@ Material& Material::operator=(const Material& material) {
 
     _name = material._name;
     _alphaMode = material._alphaMode;
-    _cullMode = material._cullMode;
     _model = material._model;
     _key = material._key;
     _emissive = material._emissive;

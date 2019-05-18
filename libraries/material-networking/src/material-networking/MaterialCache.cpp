@@ -115,7 +115,6 @@ NetworkMaterialResource::ParsedMaterials NetworkMaterialResource::parseJSONMater
  *     Supported models are: "hifi_pbr"
  * @property {string} name="" - A name for the material. Supported by all material models.
  * @property {string} alphaMode="" - The alpha mode for the material. Can be <code>"BLEND"</code>, <code>"MASK"</code>, or <code>"OPAQUE"</code>.
- * @property {string} cullMode="" - The cull mode for the material. Can be <code>"BACK"</code>, <code>"FRONT"</code>, or <code>"DISABLED"</code>.
  * @property {Color|RGBS|string} emissive - The emissive color, i.e., the color that the material emits. A {@link Color} value
  *     is treated as sRGB. A {@link RGBS} value can be either RGB or sRGB.  Set to <code>"fallthrough"</code> to fallthrough to
  *     the material below.  "hifi_pbr" model only.
@@ -198,12 +197,7 @@ std::pair<std::string, std::shared_ptr<NetworkMaterial>> NetworkMaterialResource
             } else if (key == "alphaMode") {
                 auto alphaModeJSON = materialJSON.value(key);
                 if (alphaModeJSON.isString()) {
-                    material->setAlphaMode(NetworkMaterial::AlphaModeFromString(alphaModeJSON.toString().toStdString()));
-                }
-            } else if (key == "cullMode") {
-                auto cullModeJSON = materialJSON.value(key);
-                if (cullModeJSON.isString()) {
-                    material->setCullMode(NetworkMaterial::CullModeFromString(cullModeJSON.toString().toStdString()));
+                    material->setAlphaMode(NetworkMaterial::alphaModeFromString(alphaModeJSON.toString()));
                 }
             } else if (key == "emissive") {
                 auto value = materialJSON.value(key);
@@ -601,17 +595,6 @@ NetworkMaterial::NetworkMaterial(const HFMMaterial& material, const QUrl& textur
             break;
         case hfm::AlphaMode::HFM_OPAQUE:
             _alphaMode = NetworkMaterial::MAT_OPAQUE;
-            break;
-    }
-    switch (material.cullMode) {
-        case hfm::CullMode::HFM_BACK:
-            _cullMode = NetworkMaterial::MAT_BACK;
-            break;
-        case hfm::CullMode::HFM_FRONT:
-            _cullMode = NetworkMaterial::MAT_FRONT;
-            break;
-        case hfm::CullMode::HFM_DISABLED:
-            _cullMode = NetworkMaterial::MAT_DISABLED;
             break;
     }
 

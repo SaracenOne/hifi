@@ -363,6 +363,8 @@ namespace scriptable {
         obj.setProperty("name", material.name);
         obj.setProperty("model", material.model);
 
+        obj.setProperty("alphaMode", Material::alphaModeAsString(material.alphaMode));
+
         bool hasPropertyFallthroughs = !material.propertyFallthroughs.empty();
 
         const QScriptValue FALLTHROUGH("fallthrough");

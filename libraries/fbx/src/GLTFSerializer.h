@@ -416,14 +416,6 @@ struct GLTFpbrMetallicRoughness {
     }
 };
 
-namespace GLTFMaterialAlphaMode {
-    enum Values {
-        GLTF_OPAQUE = 0,
-        GLTF_MASK,
-        GLTF_BLEND
-    };
-};
-
 struct GLTFMaterial {
     QString name;
     QVector<double> emissiveFactor;

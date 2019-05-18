@@ -327,42 +327,32 @@ public:
         MAT_OPAQUE,
     };
 
-    static MaterialAlphaMode AlphaModeFromString(const std::string& alphaMode) {
-        if (alphaMode == "BLEND" || alphaMode == "Blend" || alphaMode == "blend") {
+    static MaterialAlphaMode alphaModeFromString(const QString& alphaMode) {
+        if (alphaMode.toLower() == "blend") {
             return MAT_BLEND;
-        } else if (alphaMode == "MASK" || alphaMode == "Mask" || alphaMode == "mask") {
+        } else if (alphaMode.toLower() == "mask") {
             return MAT_MASK;
-        } else if (alphaMode == "OPAQUE" || alphaMode == "Opaque" || alphaMode == "opaque") {
+        } else if (alphaMode.toLower() == "opaque") {
             return MAT_OPAQUE;
         } else {
             return MAT_BLEND;
         }
     };
 
-    const MaterialAlphaMode getAlphaMode() const { return _alphaMode; }
-    void setAlphaMode(const MaterialAlphaMode alphaMode);
-
-    enum MaterialCullMode
-    {
-        MAT_BACK = 0,
-        MAT_FRONT,
-        MAT_DISABLED
-    };
-
-    static MaterialCullMode CullModeFromString(const std::string& cullMode) {
-        if (cullMode == "BACK" || cullMode == "Back" || cullMode == "back") {
-            return MAT_BACK;
-        } else if (cullMode == "FRONT" || cullMode == "Front" || cullMode == "front") {
-            return MAT_FRONT;
-        } else if (cullMode == "DISABLED" || cullMode == "Disabled" || cullMode == "disabled") {
-            return MAT_DISABLED;
+    static QString alphaModeAsString(const MaterialAlphaMode& alphaMode) {
+        if (alphaMode == MAT_BLEND) {
+            return "blend";
+        } else if (alphaMode == MAT_MASK) {
+            return "mask";
+        } else if (alphaMode == MAT_OPAQUE) {
+            return "opaque";
         } else {
-            return MAT_BACK;
+            return "blend";
         }
     };
 
-    const MaterialCullMode getCullMode() const { return _cullMode; }
-    void setCullMode(const MaterialCullMode cullMode) { _cullMode = cullMode; }
+    const MaterialAlphaMode getAlphaMode() const { return _alphaMode; }
+    void setAlphaMode(const MaterialAlphaMode alphaMode);
 
     const std::string& getModel() const { return _model; }
     void setModel(const std::string& model) { _model = model; }
@@ -390,7 +380,6 @@ public:
 protected:
     std::string _name { "" };
     MaterialAlphaMode _alphaMode { MAT_BLEND };
-    MaterialCullMode _cullMode { MAT_BACK };
 private:
     std::string _model { "hifi_pbr" };
     mutable MaterialKey _key { 0 };

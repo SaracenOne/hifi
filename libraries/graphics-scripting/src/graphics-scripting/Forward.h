@@ -42,7 +42,6 @@ namespace scriptable {
      * @typedef {object} Graphics.Material
      * @property {string} name
      * @property {string} alphaMode
-     * @property {string} cullMode
      * @property {string} model
      * @property {number|string} opacity
      * @property {number|string} roughness
@@ -78,7 +77,6 @@ namespace scriptable {
 
         QString name;
         Material::MaterialAlphaMode alphaMode;
-        Material::MaterialCullMode cullMode;
         QString model;
         float opacity;
         float roughness;
