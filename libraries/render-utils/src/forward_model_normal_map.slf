@@ -40,8 +40,9 @@ void main(void) {
     <$fetchMaterialTexturesCoord0(matKey, _texCoord0, albedoTex, roughnessTex, normalTex, metallicTex, emissiveTex)$>
     <$fetchMaterialTexturesCoord1(matKey, _texCoord1, occlusionTex)$>
 
+	float alphaCutoff = getMaterialAlphaCutoff(mat);
     float opacity = 1.0;
-    <$evalMaterialOpacity(albedoTex.a, opacity, matKey, opacity)&>;
+    <$evalMaterialOpacity(albedoTex.a, opacity, matKey, opacity, alphaCutoff)$>;
     <$discardTransparent(opacity)$>;
 
     vec3 albedo = getMaterialAlbedo(mat);

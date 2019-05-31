@@ -325,6 +325,7 @@ void batchSetter(const ShapePipeline& pipeline, gpu::Batch& batch, RenderArgs* a
             schema._opacity = 1.0f;
             schema._metallic = 0.1f;
             schema._roughness = 0.9f;
+            schema._alphaCutoff = graphics::Material::DEFAULT_ALPHA_CUTOFF;
 
             schemaKey.setAlbedo(true);
             schemaKey.setTranslucentFactor(false);
@@ -641,6 +642,12 @@ void RenderPipelines::updateMultiMaterial(graphics::MultiMaterial& multiMaterial
                         wasSet = true;
                     }
                     break;
+                case graphics::Material::ALPHA_CUTOFF:
+                    if (!fallthrough) {
+                        schema._alphaCutoff = material->getAlphaCutoff();
+                        wasSet = true;
+                    }
+                    break;
                 default:
                     break;
             }
@@ -679,6 +686,7 @@ void RenderPipelines::updateMultiMaterial(graphics::MultiMaterial& multiMaterial
             case graphics::Material::TEXCOORDTRANSFORM1:
             case graphics::Material::LIGHTMAP_PARAMS:
             case graphics::Material::MATERIAL_PARAMS:
+            case graphics::Material::ALPHA_CUTOFF:
                 // these are initialized to the correct default values in Schema()
                 break;
             case graphics::MaterialKey::ALBEDO_MAP_BIT:

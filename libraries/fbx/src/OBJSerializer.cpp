@@ -897,7 +897,8 @@ HFMModel::Pointer OBJSerializer::read(const hifi::ByteArray& data, const hifi::V
                                                                                 objMaterial.emissiveColor,
                                                                                 objMaterial.shininess,
                                                                                 objMaterial.opacity,
-                                                                                hfm::AlphaMode::HFM_BLEND);
+                                                                                hfm::AlphaMode::HFM_BLEND,
+                                                                                0.5f);
         hfmMaterial.name = materialID;
         hfmMaterial.materialID = materialID;
         hfmMaterial._material = std::make_shared<graphics::Material>();

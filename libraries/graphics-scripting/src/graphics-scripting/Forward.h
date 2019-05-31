@@ -77,6 +77,7 @@ namespace scriptable {
 
         QString name;
         Material::MaterialAlphaMode alphaMode;
+        float alphaCutoff;
         QString model;
         float opacity;
         float roughness;

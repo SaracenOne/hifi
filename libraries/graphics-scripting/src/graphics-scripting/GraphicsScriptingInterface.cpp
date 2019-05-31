@@ -486,6 +486,11 @@ namespace scriptable {
         if (hasPropertyFallthroughs && material.propertyFallthroughs.at(graphics::Material::MATERIAL_PARAMS)) {
             obj.setProperty("materialParams", FALLTHROUGH);
         }
+        if (hasPropertyFallthroughs && material.propertyFallthroughs.at(graphics::Material::ALPHA_CUTOFF)) {
+            obj.setProperty("alphaCutoff", FALLTHROUGH);
+        } else if (material.alphaCutoff != graphics::Material::DEFAULT_ALPHA_CUTOFF) {
+            obj.setProperty("alphaCutoff", material.alphaCutoff);
+        }
 
         obj.setProperty("defaultFallthrough", material.defaultFallthrough);
 

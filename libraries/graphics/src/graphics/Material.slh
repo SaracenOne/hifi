@@ -49,7 +49,7 @@ struct TexMapArray {
 struct Material {
     vec4 _emissiveOpacity;
     vec4 _albedoRoughness;
-    vec4 _metallicScatteringSpare2;
+    vec4 _metallicScatteringAlphaCutoffSpare1;
     vec4 _keySpare3;
 };
 
@@ -72,8 +72,9 @@ vec3 getMaterialAlbedo(Material m) { return m._albedoRoughness.rgb; }
 float getMaterialRoughness(Material m) { return m._albedoRoughness.a; }
 float getMaterialShininess(Material m) { return 1.0 - getMaterialRoughness(m); }
 
-float getMaterialMetallic(Material m) { return m._metallicScatteringSpare2.x; }
-float getMaterialScattering(Material m) { return m._metallicScatteringSpare2.y; }
+float getMaterialMetallic(Material m) { return m._metallicScatteringAlphaCutoffSpare1.x; }
+float getMaterialScattering(Material m) { return m._metallicScatteringAlphaCutoffSpare1.y; }
+float getMaterialAlphaCutoff(Material m) { return m._metallicScatteringAlphaCutoffSpare1.z; }
 
 BITFIELD getMaterialKey(Material m) { return floatBitsToInt(m._keySpare3.x); }
 

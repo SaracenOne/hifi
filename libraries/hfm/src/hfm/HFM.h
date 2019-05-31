@@ -184,18 +184,20 @@ class Material {
 public:
     Material() {};
     Material(const glm::vec3& diffuseColor, const glm::vec3& specularColor, const glm::vec3& emissiveColor,
-         float shininess, float opacity, AlphaMode::Values alphaMode) :
+         float shininess, float opacity, AlphaMode::Values alphaMode, float alphaCutoff) :
         diffuseColor(diffuseColor),
         specularColor(specularColor),
         emissiveColor(emissiveColor),
         shininess(shininess),
         opacity(opacity),
-        alphaMode(alphaMode) {}
+        alphaMode(alphaMode),
+        alphaCutoff(alphaCutoff) {}
 
     void getTextureNames(QSet<QString>& textureList) const;
     void setMaxNumPixelsPerTexture(int maxNumPixels);
 
     AlphaMode::Values alphaMode{ AlphaMode::HFM_BLEND };
+    float alphaCutoff{ 0.5f };
 
     glm::vec3 diffuseColor{ 1.0f };
     float diffuseFactor{ 1.0f };

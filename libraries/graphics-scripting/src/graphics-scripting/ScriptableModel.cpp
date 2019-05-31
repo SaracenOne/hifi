@@ -22,6 +22,7 @@
 scriptable::ScriptableMaterial& scriptable::ScriptableMaterial::operator=(const scriptable::ScriptableMaterial& material) {
     name = material.name;
     alphaMode = material.alphaMode;
+    alphaCutoff = material.alphaCutoff;
     model = material.model;
     opacity = material.opacity;
     roughness = material.roughness;
@@ -55,6 +56,7 @@ scriptable::ScriptableMaterial::ScriptableMaterial(const graphics::MaterialPoint
     if (material) {
         name = material->getName().c_str();
         alphaMode = material->getAlphaMode();
+        alphaCutoff = material->getAlphaCutoff();
         model = material->getModel().c_str();
         opacity = material->getOpacity();
         roughness = material->getRoughness();

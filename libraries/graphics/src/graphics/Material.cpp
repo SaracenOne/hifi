@@ -23,6 +23,7 @@ const float Material::DEFAULT_ALBEDO { 0.5f };
 const float Material::DEFAULT_METALLIC { 0.0f };
 const float Material::DEFAULT_ROUGHNESS { 1.0f };
 const float Material::DEFAULT_SCATTERING { 0.0f };
+const float Material::DEFAULT_ALPHA_CUTOFF { 0.5f };
 
 Material::Material() {
     for (int i = 0; i < NUM_TOTAL_FLAGS; i++) {
@@ -33,6 +34,7 @@ Material::Material() {
 Material::Material(const Material& material) :
     _name(material._name),
     _alphaMode(material._alphaMode),
+    _alphaCutoff(material._alphaCutoff),
     _model(material._model),
     _key(material._key),
     _emissive(material._emissive),
@@ -55,6 +57,7 @@ Material& Material::operator=(const Material& material) {
 
     _name = material._name;
     _alphaMode = material._alphaMode;
+    _alphaCutoff = material._alphaCutoff;
     _model = material._model;
     _key = material._key;
     _emissive = material._emissive;

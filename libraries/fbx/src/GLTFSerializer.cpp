@@ -1762,7 +1762,11 @@ void GLTFSerializer::setHFMMaterial(HFMMaterial& fbxmat, const GLTFMaterial& mat
     } else {
         fbxmat.alphaMode = hfm::AlphaMode::HFM_OPAQUE;
     }
-    
+
+    if (material.defined["alphaCutoff"]) {
+        fbxmat.alphaCutoff = material.alphaCutoff;
+    }
+
     if (material.defined["emissiveFactor"] && material.emissiveFactor.size() == 3) {
         glm::vec3 emissive = glm::vec3(material.emissiveFactor[0], 
                                        material.emissiveFactor[1], 

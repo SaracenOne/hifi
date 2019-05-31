@@ -115,6 +115,8 @@ NetworkMaterialResource::ParsedMaterials NetworkMaterialResource::parseJSONMater
  *     Supported models are: "hifi_pbr"
  * @property {string} name="" - A name for the material. Supported by all material models.
  * @property {string} alphaMode="" - The alpha mode for the material. Can be <code>"BLEND"</code>, <code>"MASK"</code>, or <code>"OPAQUE"</code>.
+ * @property {number|string} alphaCutoff=0.5 - The cutoff for alpha mask mode, <code>0.0</code> &ndash; <code>1.0</code>.  Set to <code>"fallthrough"</code> to fallthrough to
+ *     the material below.  "hifi_pbr" model only.
  * @property {Color|RGBS|string} emissive - The emissive color, i.e., the color that the material emits. A {@link Color} value
  *     is treated as sRGB. A {@link RGBS} value can be either RGB or sRGB.  Set to <code>"fallthrough"</code> to fallthrough to
  *     the material below.  "hifi_pbr" model only.
@@ -415,6 +417,16 @@ std::pair<std::string, std::shared_ptr<NetworkMaterial>> NetworkMaterialResource
                     }
                 }
                 // TODO: implement materialParams
+            } else if (key == "alphaCutoff") {
+                auto value = materialJSON.value(key);
+                if (value.isString()) {
+                    auto valueString = value.toString();
+                    if (valueString == FALLTHROUGH) {
+                        material->setPropertyDoesFallthrough(graphics::Material::ExtraFlagBit::ALPHA_CUTOFF);
+                    }
+                } else if (value.isDouble()) {
+                    material->setAlphaCutoff(value.toDouble());
+                }
             } else if (key == "defaultFallthrough") {
                 auto value = materialJSON.value(key);
                 if (value.isBool()) {
@@ -667,6 +679,8 @@ NetworkMaterial::NetworkMaterial(const HFMMaterial& material, const QUrl& textur
         }
         setTextureMap(MapChannel::LIGHTMAP_MAP, map);
     }
+
+    setAlphaCutoff(material.alphaCutoff);
 }
 
 void NetworkMaterial::setTextures(const QVariantMap& textureMap) {

@@ -354,6 +354,10 @@ public:
     const MaterialAlphaMode getAlphaMode() const { return _alphaMode; }
     void setAlphaMode(const MaterialAlphaMode alphaMode);
 
+    static const float DEFAULT_ALPHA_CUTOFF;
+    void setAlphaCutoff(float alphaCutoff) { _alphaCutoff = alphaCutoff; }
+    float getAlphaCutoff() const { return _alphaCutoff; }
+
     const std::string& getModel() const { return _model; }
     void setModel(const std::string& model) { _model = model; }
 
@@ -370,6 +374,7 @@ public:
         TEXCOORDTRANSFORM1,
         LIGHTMAP_PARAMS,
         MATERIAL_PARAMS,
+        ALPHA_CUTOFF,
 
         NUM_TOTAL_FLAGS
     };
@@ -394,6 +399,7 @@ private:
     std::array<glm::mat4, NUM_TEXCOORD_TRANSFORMS> _texcoordTransforms;
     glm::vec2 _lightmapParams { 0.0, 1.0 };
     glm::vec2 _materialParams { 0.0, 1.0 };
+    float _alphaCutoff { DEFAULT_ALPHA_CUTOFF };
     TextureMaps _textureMaps;
 
     bool _defaultFallthrough { false };
@@ -459,10 +465,12 @@ public:
 
         float _metallic { Material::DEFAULT_METALLIC }; // Not Metallic
         float _scattering { Material::DEFAULT_SCATTERING }; // Scattering info
+
+		float _alphaCutoff{ Material::DEFAULT_ALPHA_CUTOFF };
 #if defined(__clang__)
         __attribute__((unused))
 #endif
-        glm::vec2 _spare { 0.0f }; // Padding
+        float _spare { 0.0f }; // Padding
 
         uint32_t _key { 0 }; // a copy of the materialKey
 #if defined(__clang__)
