@@ -283,6 +283,45 @@ public:
     void setOpacity(float opacity);
     float getOpacity() const { return _opacity; }
 
+    enum AlphaMode
+    {
+        MAT_BLEND = 0,
+        MAT_MASK,
+        MAT_OPAQUE,
+    };
+
+    static AlphaMode alphaModeFromString(const std::string& alphaMode) {
+        QString alphaModeLower = QString::fromStdString(alphaMode).toLower();
+        if (alphaModeLower == "blend") {
+            return MAT_BLEND;
+        } else if (alphaModeLower == "mask") {
+            return MAT_MASK;
+        } else if (alphaModeLower == "opaque") {
+            return MAT_OPAQUE;
+        } else {
+            return MAT_BLEND;
+        }
+    };
+
+    static QString alphaModeAsString(const AlphaMode& alphaMode) {
+        if (alphaMode == MAT_BLEND) {
+            return "blend";
+        } else if (alphaMode == MAT_MASK) {
+            return "mask";
+        } else if (alphaMode == MAT_OPAQUE) {
+            return "opaque";
+        } else {
+            return "blend";
+        }
+    };
+
+    const AlphaMode getAlphaMode() const { return _alphaMode; }
+    void setAlphaMode(const AlphaMode alphaMode);
+
+    static const float DEFAULT_ALPHA_CUTOFF;
+    void setAlphaCutoff(float alphaCutoff) { _alphaCutoff = alphaCutoff; }
+    float getAlphaCutoff() const { return _alphaCutoff; }
+
     void setUnlit(bool value);
     bool isUnlit() const { return _key.isUnlit(); }
 
@@ -310,7 +349,7 @@ public:
 
     // Albedo maps cannot have opacity detected until they are loaded
     // This method allows const changing of the key/schemaBuffer without touching the map
-    void resetOpacityMap() const;
+    void resetOpacityMap(AlphaMode alphaMode) const;
 
     // conversion from legacy material properties to PBR equivalent
     static float shininessToRoughness(float shininess) { return 1.0f - shininess / 100.0f; }
@@ -319,44 +358,6 @@ public:
 
     const std::string& getName() const { return _name; }
     void setName(const std::string& name) { _name = name; }
-
-    enum MaterialAlphaMode
-    {
-        MAT_BLEND = 0,
-        MAT_MASK,
-        MAT_OPAQUE,
-    };
-
-    static MaterialAlphaMode alphaModeFromString(const QString& alphaMode) {
-        if (alphaMode.toLower() == "blend") {
-            return MAT_BLEND;
-        } else if (alphaMode.toLower() == "mask") {
-            return MAT_MASK;
-        } else if (alphaMode.toLower() == "opaque") {
-            return MAT_OPAQUE;
-        } else {
-            return MAT_BLEND;
-        }
-    };
-
-    static QString alphaModeAsString(const MaterialAlphaMode& alphaMode) {
-        if (alphaMode == MAT_BLEND) {
-            return "blend";
-        } else if (alphaMode == MAT_MASK) {
-            return "mask";
-        } else if (alphaMode == MAT_OPAQUE) {
-            return "opaque";
-        } else {
-            return "blend";
-        }
-    };
-
-    const MaterialAlphaMode getAlphaMode() const { return _alphaMode; }
-    void setAlphaMode(const MaterialAlphaMode alphaMode);
-
-    static const float DEFAULT_ALPHA_CUTOFF;
-    void setAlphaCutoff(float alphaCutoff) { _alphaCutoff = alphaCutoff; }
-    float getAlphaCutoff() const { return _alphaCutoff; }
 
     const std::string& getModel() const { return _model; }
     void setModel(const std::string& model) { _model = model; }
@@ -374,6 +375,7 @@ public:
         TEXCOORDTRANSFORM1,
         LIGHTMAP_PARAMS,
         MATERIAL_PARAMS,
+        ALPHA_MODE,
         ALPHA_CUTOFF,
 
         NUM_TOTAL_FLAGS
@@ -384,7 +386,6 @@ public:
 
 protected:
     std::string _name { "" };
-    MaterialAlphaMode _alphaMode { MAT_BLEND };
 private:
     std::string _model { "hifi_pbr" };
     mutable MaterialKey _key { 0 };
@@ -392,6 +393,8 @@ private:
     // Material properties
     glm::vec3 _emissive { DEFAULT_EMISSIVE };
     float _opacity { DEFAULT_OPACITY };
+    AlphaMode _alphaMode{ MAT_BLEND };
+    float _alphaCutoff{ DEFAULT_ALPHA_CUTOFF };
     glm::vec3 _albedo { DEFAULT_ALBEDO };
     float _roughness { DEFAULT_ROUGHNESS };
     float _metallic { DEFAULT_METALLIC };
@@ -399,7 +402,6 @@ private:
     std::array<glm::mat4, NUM_TEXCOORD_TRANSFORMS> _texcoordTransforms;
     glm::vec2 _lightmapParams { 0.0, 1.0 };
     glm::vec2 _materialParams { 0.0, 1.0 };
-    float _alphaCutoff { DEFAULT_ALPHA_CUTOFF };
     TextureMaps _textureMaps;
 
     bool _defaultFallthrough { false };

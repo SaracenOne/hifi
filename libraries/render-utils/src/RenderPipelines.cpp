@@ -401,9 +401,11 @@ void RenderPipelines::updateMultiMaterial(graphics::MultiMaterial& multiMaterial
         }
     });
 
+    graphics::Material::AlphaMode alphaMode = graphics::Material::MAT_BLEND;
     graphics::MultiMaterial materials = multiMaterial;
     graphics::MultiMaterial::Schema schema;
     graphics::MaterialKey schemaKey;
+    graphics::MaterialPointer alphaChannelSetMaterial = NULL;
 
     std::set<uint> flagsToCheck = allFlags;
     std::set<uint> flagsToSetDefault;
@@ -480,7 +482,7 @@ void RenderPipelines::updateMultiMaterial(graphics::MultiMaterial& multiMaterial
                         auto itr = textureMaps.find(graphics::MaterialKey::ALBEDO_MAP);
                         if (itr != textureMaps.end()) {
                             if (itr->second->isDefined()) {
-                                material->resetOpacityMap();
+                                material->resetOpacityMap(alphaMode);
                                 drawMaterialTextures->setTexture(gr::Texture::MaterialAlbedo, itr->second->getTextureView());
                                 wasSet = true;
                             } else {
@@ -493,6 +495,7 @@ void RenderPipelines::updateMultiMaterial(graphics::MultiMaterial& multiMaterial
                         schemaKey.setAlbedoMap(true);
                         schemaKey.setOpacityMaskMap(material->getKey().isOpacityMaskMap());
                         schemaKey.setTranslucentMap(material->getKey().isTranslucentMap());
+                        alphaChannelSetMaterial = material;
                     }
                     break;
                 case graphics::MaterialKey::METALLIC_MAP_BIT:
@@ -642,6 +645,17 @@ void RenderPipelines::updateMultiMaterial(graphics::MultiMaterial& multiMaterial
                         wasSet = true;
                     }
                     break;
+                case graphics::Material::ALPHA_MODE:
+                    if (!fallthrough) {
+                        alphaMode = material->getAlphaMode();
+                        if (alphaChannelSetMaterial) {
+                            alphaChannelSetMaterial->resetOpacityMap(alphaMode);
+                            schemaKey.setOpacityMaskMap(material->getKey().isOpacityMaskMap());
+                            schemaKey.setTranslucentMap(material->getKey().isTranslucentMap());
+                        }
+                        wasSet = true;
+                    }
+                    break;
                 case graphics::Material::ALPHA_CUTOFF:
                     if (!fallthrough) {
                         schema._alphaCutoff = material->getAlphaCutoff();
@@ -686,6 +700,7 @@ void RenderPipelines::updateMultiMaterial(graphics::MultiMaterial& multiMaterial
             case graphics::Material::TEXCOORDTRANSFORM1:
             case graphics::Material::LIGHTMAP_PARAMS:
             case graphics::Material::MATERIAL_PARAMS:
+            case graphics::Material::ALPHA_MODE:
             case graphics::Material::ALPHA_CUTOFF:
                 // these are initialized to the correct default values in Schema()
                 break;

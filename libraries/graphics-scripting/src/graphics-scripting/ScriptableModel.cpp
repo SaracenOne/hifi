@@ -21,10 +21,10 @@
 
 scriptable::ScriptableMaterial& scriptable::ScriptableMaterial::operator=(const scriptable::ScriptableMaterial& material) {
     name = material.name;
-    alphaMode = material.alphaMode;
-    alphaCutoff = material.alphaCutoff;
     model = material.model;
     opacity = material.opacity;
+    alphaMode = material.alphaMode;
+    alphaCutoff = material.alphaCutoff;
     roughness = material.roughness;
     metallic = material.metallic;
     scattering = material.scattering;
@@ -55,10 +55,10 @@ scriptable::ScriptableMaterial& scriptable::ScriptableMaterial::operator=(const 
 scriptable::ScriptableMaterial::ScriptableMaterial(const graphics::MaterialPointer& material) {
     if (material) {
         name = material->getName().c_str();
-        alphaMode = material->getAlphaMode();
-        alphaCutoff = material->getAlphaCutoff();
         model = material->getModel().c_str();
         opacity = material->getOpacity();
+        alphaMode = material->getAlphaMode();
+        alphaCutoff = material->getAlphaCutoff();
         roughness = material->getRoughness();
         metallic = material->getMetallic();
         scattering = material->getScattering();

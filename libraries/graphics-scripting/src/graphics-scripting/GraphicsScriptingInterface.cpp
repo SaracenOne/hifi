@@ -363,8 +363,6 @@ namespace scriptable {
         obj.setProperty("name", material.name);
         obj.setProperty("model", material.model);
 
-        obj.setProperty("alphaMode", Material::alphaModeAsString(material.alphaMode));
-
         bool hasPropertyFallthroughs = !material.propertyFallthroughs.empty();
 
         const QScriptValue FALLTHROUGH("fallthrough");
@@ -485,6 +483,11 @@ namespace scriptable {
         }
         if (hasPropertyFallthroughs && material.propertyFallthroughs.at(graphics::Material::MATERIAL_PARAMS)) {
             obj.setProperty("materialParams", FALLTHROUGH);
+        }
+        if (hasPropertyFallthroughs && material.propertyFallthroughs.at(graphics::Material::ALPHA_MODE)) {
+            obj.setProperty("alphaMode", FALLTHROUGH);
+        } else {
+            obj.setProperty("alphaMode", Material::alphaModeAsString(material.alphaMode));
         }
         if (hasPropertyFallthroughs && material.propertyFallthroughs.at(graphics::Material::ALPHA_CUTOFF)) {
             obj.setProperty("alphaCutoff", FALLTHROUGH);

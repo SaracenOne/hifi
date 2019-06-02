@@ -33,12 +33,12 @@ Material::Material() {
 
 Material::Material(const Material& material) :
     _name(material._name),
-    _alphaMode(material._alphaMode),
-    _alphaCutoff(material._alphaCutoff),
     _model(material._model),
     _key(material._key),
     _emissive(material._emissive),
     _opacity(material._opacity),
+    _alphaMode(material._alphaMode),
+    _alphaCutoff(material._alphaCutoff),
     _albedo(material._albedo),
     _roughness(material._roughness),
     _metallic(material._metallic),
@@ -56,12 +56,12 @@ Material& Material::operator=(const Material& material) {
     QMutexLocker locker(&_textureMapsMutex);
 
     _name = material._name;
-    _alphaMode = material._alphaMode;
-    _alphaCutoff = material._alphaCutoff;
     _model = material._model;
     _key = material._key;
     _emissive = material._emissive;
     _opacity = material._opacity;
+    _alphaMode = material._alphaMode;
+    _alphaCutoff = material._alphaCutoff;
     _albedo = material._albedo;
     _roughness = material._roughness;
     _metallic = material._metallic;
@@ -77,10 +77,10 @@ Material& Material::operator=(const Material& material) {
     return (*this);
 }
 
-void Material::setAlphaMode(const MaterialAlphaMode alphaMode) {
+void Material::setAlphaMode(const AlphaMode alphaMode) {
     if (alphaMode != _alphaMode) {
         _alphaMode = alphaMode;
-        resetOpacityMap();
+        resetOpacityMap(_alphaMode);
     }
 }
 
@@ -133,7 +133,7 @@ void Material::setTextureMap(MapChannel channel, const TextureMapPointer& textur
     }
 
     if (channel == MaterialKey::ALBEDO_MAP) {
-        resetOpacityMap();
+        resetOpacityMap(_alphaMode);
         _texcoordTransforms[0] = (textureMap ? textureMap->getTextureTransform().getMatrix() : glm::mat4());
     }
 
@@ -151,12 +151,12 @@ void Material::setTextureMap(MapChannel channel, const TextureMapPointer& textur
 
 }
 
-void Material::resetOpacityMap() const {
+void Material::resetOpacityMap(AlphaMode alphaMode) const {
     // Clear the previous flags
     _key.setOpacityMaskMap(false);
     _key.setTranslucentMap(false);
 
-    if (_alphaMode == MAT_OPAQUE) {
+    if (alphaMode == MAT_OPAQUE) {
         return;
     }
 
@@ -168,7 +168,7 @@ void Material::resetOpacityMap() const {
 
         auto usage = textureMap->getTextureView()._texture->getUsage();
         if (usage.isAlpha()) {
-            if (usage.isAlphaMask() || _alphaMode == MAT_MASK) {
+            if (usage.isAlphaMask() || alphaMode == MAT_MASK) {
                 // Texture has alpha, but it is just a mask
                 _key.setOpacityMaskMap(true);
                 _key.setTranslucentMap(false);

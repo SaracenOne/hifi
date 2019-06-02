@@ -114,7 +114,7 @@ NetworkMaterialResource::ParsedMaterials NetworkMaterialResource::parseJSONMater
  * @property {string} model="hifi_pbr" - Different material models support different properties and rendering modes.
  *     Supported models are: "hifi_pbr"
  * @property {string} name="" - A name for the material. Supported by all material models.
- * @property {string} alphaMode="" - The alpha mode for the material. Can be <code>"BLEND"</code>, <code>"MASK"</code>, or <code>"OPAQUE"</code>.
+ * @property {string} alphaMode="" - The alpha mode for the material. Can be <code>"blend"</code>, <code>"mask"</code>, or <code>"opaque"</code>. "hifi_pbr" model only.
  * @property {number|string} alphaCutoff=0.5 - The cutoff for alpha mask mode, <code>0.0</code> &ndash; <code>1.0</code>.  Set to <code>"fallthrough"</code> to fallthrough to
  *     the material below.  "hifi_pbr" model only.
  * @property {Color|RGBS|string} emissive - The emissive color, i.e., the color that the material emits. A {@link Color} value
@@ -195,11 +195,6 @@ std::pair<std::string, std::shared_ptr<NetworkMaterial>> NetworkMaterialResource
                 auto modelJSON = materialJSON.value(key);
                 if (modelJSON.isString()) {
                     material->setModel(modelJSON.toString().toStdString());
-                }
-            } else if (key == "alphaMode") {
-                auto alphaModeJSON = materialJSON.value(key);
-                if (alphaModeJSON.isString()) {
-                    material->setAlphaMode(NetworkMaterial::alphaModeFromString(alphaModeJSON.toString()));
                 }
             } else if (key == "emissive") {
                 auto value = materialJSON.value(key);
@@ -399,6 +394,7 @@ std::pair<std::string, std::shared_ptr<NetworkMaterial>> NetworkMaterialResource
                     glm::mat4 transform = mat4FromVariant(valueVariant);
                     texcoordTransforms[1] = transform;
                 }
+                // TODO: implement lightmapParams
             } else if (key == "lightmapParams") {
                 auto value = materialJSON.value(key);
                 if (value.isString()) {
@@ -407,7 +403,7 @@ std::pair<std::string, std::shared_ptr<NetworkMaterial>> NetworkMaterialResource
                         material->setPropertyDoesFallthrough(graphics::Material::ExtraFlagBit::LIGHTMAP_PARAMS);
                     }
                 }
-                // TODO: implement lightmapParams
+                // TODO: implement materialParams
             } else if (key == "materialParams") {
                 auto value = materialJSON.value(key);
                 if (value.isString()) {
@@ -416,7 +412,16 @@ std::pair<std::string, std::shared_ptr<NetworkMaterial>> NetworkMaterialResource
                         material->setPropertyDoesFallthrough(graphics::Material::ExtraFlagBit::MATERIAL_PARAMS);
                     }
                 }
-                // TODO: implement materialParams
+            } else if (key == "alphaMode") {
+                auto alphaModeJSON = materialJSON.value(key);
+                if (alphaModeJSON.isString()) {
+                    auto valueString = alphaModeJSON.toString();
+                    if (valueString == FALLTHROUGH) {
+                        material->setPropertyDoesFallthrough(graphics::Material::ExtraFlagBit::ALPHA_MODE);
+                    } else {
+                        material->setAlphaMode(graphics::Material::alphaModeFromString(alphaModeJSON.toString().toStdString()));
+                    }
+                }
             } else if (key == "alphaCutoff") {
                 auto value = materialJSON.value(key);
                 if (value.isString()) {
@@ -598,17 +603,7 @@ NetworkMaterial::NetworkMaterial(const HFMMaterial& material, const QUrl& textur
     graphics::Material(*material._material)
 {
     _name = material.name.toStdString();
-    switch (material.alphaMode) {
-        case hfm::AlphaMode::HFM_BLEND:
-            _alphaMode = NetworkMaterial::MAT_BLEND;
-            break;
-        case hfm::AlphaMode::HFM_MASK:
-            _alphaMode = NetworkMaterial::MAT_MASK;
-            break;
-        case hfm::AlphaMode::HFM_OPAQUE:
-            _alphaMode = NetworkMaterial::MAT_OPAQUE;
-            break;
-    }
+    setAlphaMode(material.alphaMode);
 
     if (!material.albedoTexture.filename.isEmpty()) {
         auto map = fetchTextureMap(textureBaseUrl, material.albedoTexture, image::TextureUsage::ALBEDO_TEXTURE, MapChannel::ALBEDO_MAP);
@@ -779,6 +774,6 @@ void NetworkMaterial::checkResetOpacityMap() {
     // Geometry::areTexturesLoaded() is called repeatedly until it returns true, so we do the check here for now
     const auto& albedoTexture = _textures[NetworkMaterial::MapChannel::ALBEDO_MAP];
     if (albedoTexture.texture) {
-        resetOpacityMap();
+        resetOpacityMap(getAlphaMode());
     }
 }

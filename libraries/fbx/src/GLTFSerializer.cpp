@@ -228,15 +228,15 @@ int GLTFSerializer::getAccessorType(const QString& type)
 int GLTFSerializer::getMaterialAlphaMode(const QString& type)
 {
     if (type == "OPAQUE") {
-        return hfm::AlphaMode::HFM_OPAQUE;
+        return graphics::Material::MAT_OPAQUE;
     }
     if (type == "MASK") {
-        return hfm::AlphaMode::HFM_MASK;
+        return graphics::Material::MAT_MASK;
     }
     if (type == "BLEND") {
-        return hfm::AlphaMode::HFM_BLEND;
+        return graphics::Material::MAT_BLEND;
     }
-    return hfm::AlphaMode::HFM_OPAQUE;
+    return graphics::Material::MAT_BLEND;
 }
 
 int GLTFSerializer::getCameraType(const QString& type)
@@ -1741,84 +1741,71 @@ HFMTexture GLTFSerializer::getHFMTexture(const GLTFTexture& texture) {
     return fbxtex;
 }
 
-void GLTFSerializer::setHFMMaterial(HFMMaterial& fbxmat, const GLTFMaterial& material) {
+void GLTFSerializer::setHFMMaterial(HFMMaterial& hfmMat, const GLTFMaterial& material) {
 
 
     if (material.defined["alphaMode"]) {
-        switch (material.alphaMode) {
-            case hfm::AlphaMode::HFM_OPAQUE:
-                fbxmat.alphaMode = hfm::AlphaMode::HFM_OPAQUE;
-                break;
-            case hfm::AlphaMode::HFM_MASK:
-                fbxmat.alphaMode = hfm::AlphaMode::HFM_MASK;
-                break;
-            case hfm::AlphaMode::HFM_BLEND:
-                fbxmat.alphaMode = hfm::AlphaMode::HFM_BLEND;
-                break;
-            default:
-                fbxmat.alphaMode = hfm::AlphaMode::HFM_OPAQUE;
-                break;
-        }
+        hfmMat.alphaMode = static_cast<graphics::Material::AlphaMode>(material.alphaMode);
     } else {
-        fbxmat.alphaMode = hfm::AlphaMode::HFM_OPAQUE;
+        hfmMat.alphaMode = graphics::Material::MAT_OPAQUE; // GLTF defaults to opaque
     }
 
     if (material.defined["alphaCutoff"]) {
-        fbxmat.alphaCutoff = material.alphaCutoff;
+        hfmMat.alphaCutoff = material.alphaCutoff;
     }
 
     if (material.defined["emissiveFactor"] && material.emissiveFactor.size() == 3) {
         glm::vec3 emissive = glm::vec3(material.emissiveFactor[0], 
                                        material.emissiveFactor[1], 
                                        material.emissiveFactor[2]);
-        fbxmat._material->setEmissive(emissive);
+        hfmMat._material->setEmissive(emissive);
     }
 
     if (material.defined["emissiveTexture"]) {
-        fbxmat.emissiveTexture = getHFMTexture(_file.textures[material.emissiveTexture]);
-        fbxmat.useEmissiveMap = true;
+        hfmMat.emissiveTexture = getHFMTexture(_file.textures[material.emissiveTexture]);
+        hfmMat.useEmissiveMap = true;
     }
     
     if (material.defined["normalTexture"]) {
-        fbxmat.normalTexture = getHFMTexture(_file.textures[material.normalTexture]);
-        fbxmat.useNormalMap = true;
+        hfmMat.normalTexture = getHFMTexture(_file.textures[material.normalTexture]);
+        hfmMat.useNormalMap = true;
     }
     
     if (material.defined["occlusionTexture"]) {
-        fbxmat.occlusionTexture = getHFMTexture(_file.textures[material.occlusionTexture]);
-        fbxmat.useOcclusionMap = true;
+        hfmMat.occlusionTexture = getHFMTexture(_file.textures[material.occlusionTexture]);
+        hfmMat.useOcclusionMap = true;
     }
 
     if (material.defined["pbrMetallicRoughness"]) {
-        fbxmat.isPBSMaterial = true;
+        hfmMat.isPBSMaterial = true;
         
         if (material.pbrMetallicRoughness.defined["metallicFactor"]) {
-            fbxmat.metallic = material.pbrMetallicRoughness.metallicFactor;
+            hfmMat.metallic = material.pbrMetallicRoughness.metallicFactor;
         }
         if (material.pbrMetallicRoughness.defined["baseColorTexture"]) {
-            fbxmat.opacityTexture = getHFMTexture(_file.textures[material.pbrMetallicRoughness.baseColorTexture]);
-            fbxmat.albedoTexture = getHFMTexture(_file.textures[material.pbrMetallicRoughness.baseColorTexture]);
-            fbxmat.useAlbedoMap = true;
+            hfmMat.opacityTexture = getHFMTexture(_file.textures[material.pbrMetallicRoughness.baseColorTexture]);
+            hfmMat.albedoTexture = getHFMTexture(_file.textures[material.pbrMetallicRoughness.baseColorTexture]);
+            hfmMat.useAlbedoMap = true;
         }
         if (material.pbrMetallicRoughness.defined["metallicRoughnessTexture"]) {
-            fbxmat.roughnessTexture = getHFMTexture(_file.textures[material.pbrMetallicRoughness.metallicRoughnessTexture]);
-            fbxmat.roughnessTexture.sourceChannel = image::ColorChannel::GREEN;
-            fbxmat.useRoughnessMap = true;
-            fbxmat.metallicTexture = getHFMTexture(_file.textures[material.pbrMetallicRoughness.metallicRoughnessTexture]);
-            fbxmat.metallicTexture.sourceChannel = image::ColorChannel::BLUE;
-            fbxmat.useMetallicMap = true;
+            hfmMat.roughnessTexture = getHFMTexture(_file.textures[material.pbrMetallicRoughness.metallicRoughnessTexture]);
+            hfmMat.roughnessTexture.sourceChannel = image::ColorChannel::GREEN;
+            hfmMat.useRoughnessMap = true;
+            hfmMat.metallicTexture = getHFMTexture(_file.textures[material.pbrMetallicRoughness.metallicRoughnessTexture]);
+            hfmMat.metallicTexture.sourceChannel = image::ColorChannel::BLUE;
+            hfmMat.useMetallicMap = true;
         }
         if (material.pbrMetallicRoughness.defined["roughnessFactor"]) {
-            fbxmat._material->setRoughness(material.pbrMetallicRoughness.roughnessFactor);
+            hfmMat._material->setRoughness(material.pbrMetallicRoughness.roughnessFactor);
         }
         if (material.pbrMetallicRoughness.defined["baseColorFactor"] && 
             material.pbrMetallicRoughness.baseColorFactor.size() == 4) {
             glm::vec3 dcolor =  glm::vec3(material.pbrMetallicRoughness.baseColorFactor[0], 
                                           material.pbrMetallicRoughness.baseColorFactor[1], 
                                           material.pbrMetallicRoughness.baseColorFactor[2]);
-            fbxmat.diffuseColor = dcolor;
-            fbxmat._material->setAlbedo(dcolor);
-            fbxmat._material->setOpacity(material.pbrMetallicRoughness.baseColorFactor[3]);
+            hfmMat.diffuseColor = dcolor;
+            hfmMat._material->setAlbedo(dcolor);
+            hfmMat._material->setOpacity(material.pbrMetallicRoughness.baseColorFactor[3]);
         }   
     }
 
@@ -2097,7 +2084,8 @@ void GLTFSerializer::hfmDebugDump(const HFMModel& hfmModel) {
     foreach(HFMMaterial mat, hfmModel.materials) {
         qCDebug(modelformat) << "\n";
         qCDebug(modelformat) << "  mat.materialID =" << mat.materialID;
-        qCDebug(modelformat) << "  alphaMode =" << hfm::AlphaMode::toString(mat.alphaMode).c_str();
+        qCDebug(modelformat) << "  alphaMode =" << graphics::Material::alphaModeAsString(mat.alphaMode);
+        qCDebug(modelformat) << "  alphaCutoff =" << mat.alphaCutoff;
         qCDebug(modelformat) << "  diffuseColor =" << mat.diffuseColor;
         qCDebug(modelformat) << "  diffuseFactor =" << mat.diffuseFactor;
         qCDebug(modelformat) << "  specularColor =" << mat.specularColor;

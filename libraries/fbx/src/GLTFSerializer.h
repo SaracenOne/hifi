@@ -846,7 +846,7 @@ private:
     bool doesResourceExist(const QString& url);
 
 
-    void setHFMMaterial(HFMMaterial& fbxmat, const GLTFMaterial& material);
+    void setHFMMaterial(HFMMaterial& hfmMat, const GLTFMaterial& material);
     HFMTexture getHFMTexture(const GLTFTexture& texture);
     void glTFDebugDump();
     void hfmDebugDump(const HFMModel& hfmModel);

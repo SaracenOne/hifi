@@ -41,9 +41,10 @@ namespace scriptable {
     /**jsdoc
      * @typedef {object} Graphics.Material
      * @property {string} name
-     * @property {string} alphaMode
      * @property {string} model
      * @property {number|string} opacity
+     * @property {string} alphaMode
+     * @property {number} alphaCutoff
      * @property {number|string} roughness
      * @property {number|string} metallic
      * @property {number|string} scattering
@@ -76,10 +77,10 @@ namespace scriptable {
         ScriptableMaterial& operator=(const ScriptableMaterial& material);
 
         QString name;
-        Material::MaterialAlphaMode alphaMode;
-        float alphaCutoff;
         QString model;
         float opacity;
+        Material::AlphaMode alphaMode;
+        float alphaCutoff;
         float roughness;
         float metallic;
         float scattering;

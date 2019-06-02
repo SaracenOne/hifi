@@ -159,32 +159,11 @@ public:
     QString materialID;
 };
 
-namespace AlphaMode {
-    enum Values {
-        HFM_BLEND = 0,
-        HFM_MASK,
-        HFM_OPAQUE,
-    };
-
-    static std::string toString(Values alphaMode) {
-        switch (alphaMode) {
-            case HFM_BLEND:
-                return "BLEND";
-            case HFM_MASK:
-                return "MASK";
-            case HFM_OPAQUE:
-                return "OPAQUE";
-            default:
-                return "INVALID";
-        };
-    };
-};
-
 class Material {
 public:
     Material() {};
     Material(const glm::vec3& diffuseColor, const glm::vec3& specularColor, const glm::vec3& emissiveColor,
-         float shininess, float opacity, AlphaMode::Values alphaMode, float alphaCutoff) :
+         float shininess, float opacity, graphics::Material::AlphaMode alphaMode, float alphaCutoff) :
         diffuseColor(diffuseColor),
         specularColor(specularColor),
         emissiveColor(emissiveColor),
@@ -196,7 +175,7 @@ public:
     void getTextureNames(QSet<QString>& textureList) const;
     void setMaxNumPixelsPerTexture(int maxNumPixels);
 
-    AlphaMode::Values alphaMode{ AlphaMode::HFM_BLEND };
+    graphics::Material::AlphaMode alphaMode{ graphics::Material::MAT_BLEND };
     float alphaCutoff{ 0.5f };
 
     glm::vec3 diffuseColor{ 1.0f };
