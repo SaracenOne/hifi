@@ -645,10 +645,13 @@ class AvatarExporter : MonoBehaviour {
     }
     
     static bool WriteFST(string exportFstPath, string projectName, float scale) {        
-        // write out core fields to top of fst file
+		// Calculate the actual scale from the model import settings
+        float finalScale = scale * modelImporter.globalScale;
+
+		// write out core fields to top of fst file
         try {
             File.WriteAllText(exportFstPath, "exporterVersion = " + AVATAR_EXPORTER_VERSION + "\nname = " + projectName + 
-                                             "\ntype = body+head\nscale = " + scale + "\nfilename = " + assetName + 
+                                             "\ntype = body+head\nscale = " + finalScale + "\nfilename = " + assetName + 
                                              ".fbx\n" + "texdir = textures\n");
         } catch { 
             EditorUtility.DisplayDialog("Error", "Failed to write file " + exportFstPath + 
