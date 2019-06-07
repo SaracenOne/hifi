@@ -287,6 +287,15 @@ class AvatarExporter : MonoBehaviour {
     }
     
     class MaterialData {
+        public enum RenderMode {
+            Opaque,
+            Cutout,
+            Fade,
+            Transparent
+        };
+
+        public RenderMode renderMode;
+
         public Color albedo;
         public string albedoMap;
         public double metallic;
@@ -318,10 +327,16 @@ class AvatarExporter : MonoBehaviour {
             if (!string.IsNullOrEmpty(occlusionMap)) {
                 json += "\"occlusionMap\": \"" + occlusionMap + "\", ";
             }
-            json += "\"emissive\": [" + emissive.r + ", " + emissive.g + ", " + emissive.b + "]";
+            json += "\"emissive\": [" + emissive.r + ", " + emissive.g + ", " + emissive.b + "], ";
             if (!string.IsNullOrEmpty(emissiveMap)) {
-                json += ", \"emissiveMap\": \"" + emissiveMap + "\"";
+                json += ", \"emissiveMap\": \"" + emissiveMap + "\", ";
             }
+            if (renderMode == RenderMode.Transparent) {
+                json += "\"opacity\":" + albedo.a;
+            } else {
+                json += "\"opacity\":" + 1.0f;
+            }
+
             json += " } }";
             return json;
         }
@@ -1201,6 +1216,26 @@ class AvatarExporter : MonoBehaviour {
             }           
 
             MaterialData materialData = new MaterialData();
+
+            string renderType = material.GetTag("RenderType", false);
+            switch(renderType) {
+                case "Opaque":
+                    materialData.renderMode = MaterialData.RenderMode.Opaque;
+                    break;
+                case "Cutout":
+                    materialData.renderMode = MaterialData.RenderMode.Cutout;
+                    break;
+                case "Fade":
+                    materialData.renderMode = MaterialData.RenderMode.Fade;
+                    break;
+                case "Transparent":
+                    materialData.renderMode = MaterialData.RenderMode.Transparent;
+                    break;
+                default:
+                    materialData.renderMode = MaterialData.RenderMode.Opaque;
+                    break;
+            }
+
             materialData.albedo = material.GetColor("_Color");
             materialData.albedoMap = GetMaterialTexture(material, "_MainTex");
             materialData.roughness = material.GetFloat("_Glossiness");
